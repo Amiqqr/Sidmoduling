@@ -83,6 +83,7 @@ class SibModulingApp {
         });
     }
     
+// ==================== ВАЖНО: ЗАМЕНИТЬ ЭТОТ МЕТОД ЦЕЛИКОМ ====================
 initMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const navMenu = document.getElementById('navMenu');
@@ -92,68 +93,62 @@ initMobileMenu() {
         return;
     }
     
-    console.log('Мобильное меню найдено, инициализация...');
+    console.log('✅ Мобильное меню: кнопка и меню найдены');
     
-    // Проверяем, что кнопка видна
-    console.log('Видимость кнопки:', getComputedStyle(mobileMenuBtn).display);
-    
-    // Переключение мобильного меню
+    // Обработчик клика по кнопке меню
     mobileMenuBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         
-        console.log('Клик по кнопке меню');
+        console.log('🟡 Кнопка меню нажата');
         
-        navMenu.classList.toggle('active');
+        // Открыть/закрыть меню
+        const isActive = navMenu.classList.toggle('active');
         
-        // Анимация иконки
-        if (navMenu.classList.contains('active')) {
+        // Поменять иконку
+        if (isActive) {
             mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
-            document.body.style.overflow = 'hidden';
-            document.documentElement.style.overflow = 'hidden';
-            console.log('Меню открыто');
+            mobileMenuBtn.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden'; // Блокируем скролл
+            console.log('✅ Меню открыто');
         } else {
             mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-            console.log('Меню закрыто');
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = ''; // Разблокируем скролл
+            console.log('✅ Меню закрыто');
         }
     });
     
-    // Закрытие меню при клике на ссылку
+    // Закрыть меню при клике на ссылку
     navMenu.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
-            console.log('Клик по ссылке меню');
+            console.log('🟡 Ссылка меню нажата');
             this.closeMobileMenu();
         });
     });
     
-    // Закрытие меню при клике вне его
+    // Закрыть меню при клике вне его
     document.addEventListener('click', (e) => {
         if (navMenu.classList.contains('active') &&
             !navMenu.contains(e.target) &&
             !mobileMenuBtn.contains(e.target)) {
-            console.log('Клик вне меню');
+            console.log('🟡 Клик вне меню');
             this.closeMobileMenu();
         }
     });
     
-    // Закрытие меню на Escape
+    // Закрыть меню на клавишу Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && navMenu.classList.contains('active')) {
-            console.log('Нажата Escape');
+            console.log('🟡 Нажата Escape');
             this.closeMobileMenu();
         }
     });
     
-    // Предотвращаем закрытие при клике внутри меню
-    navMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-    
-    console.log('Мобильное меню инициализировано');
+    console.log('✅ Мобильное меню инициализировано');
 }
-    
+
+// ==================== ТАКЖЕ ЗАМЕНИТЬ ЭТОТ МЕТОД ====================
 closeMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const navMenu = document.getElementById('navMenu');
@@ -161,9 +156,9 @@ closeMobileMenu() {
     if (navMenu && navMenu.classList.contains('active')) {
         navMenu.classList.remove('active');
         mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-        console.log('Меню закрыто программно');
+        console.log('✅ Меню закрыто программно');
     }
 }
     

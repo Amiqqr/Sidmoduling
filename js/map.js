@@ -40,8 +40,8 @@ class MapManager {
         
         // Координаты Новосибирска
         const defaultLocation = {
-            lat: 54.859979,
-            lng: 83.084157,
+            lat: 55.095863,
+            lng: 82.892402,
             address: "г. Новосибирск, ул. Строителей, 15"
         };
         
@@ -175,8 +175,8 @@ class MapManager {
                     ></iframe>
                 </div>
                 <div class="map-instructions">
-                    <p><i class="fas fa-subway"></i> Метро: ст. "Студенческая"</p>
-                    <p><i class="fas fa-bus"></i> Автобусы: 5, 8, 15, 23</p>
+                    <p><i class="fas fa-subway"></i> Метро:</p>
+                    <p><i class="fas fa-bus"></i> Автобусы:</p>
                     <p><i class="fas fa-car"></i> Бесплатная парковка у ворот</p>
                 </div>
             </div>
