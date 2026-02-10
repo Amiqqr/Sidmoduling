@@ -1,7 +1,7 @@
 :root {
     --primary-dark: #fa7645;
     --primary-blue: #FF8C00;
-    --accent-teal: #FFA500;
+    --accent-teal: #ffa500;
     --accent-light: #FFD700;
     --light-bg: #F8F9FA;
     --dark-text: rgb(33, 37, 41);
@@ -956,7 +956,7 @@ header {
 .form-control:focus {
     outline: none;
     border-color: var(--accent-light);
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(144, 224, 239, 0.1);
 }
 

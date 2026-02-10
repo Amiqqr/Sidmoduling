@@ -275,12 +275,16 @@ class DatabaseAPI {
                 {
                 "id": 9,
                 "category": "offices",
-                "title": "Офис руководителя",
+                "title": "Каркасный ДомБарн House",
                 "price": "720 000 ₽",
                 "oldPrice": null,
-                "image": "images/products/9.png",
+                      "images": [ 
+                  "images/products/9.png",
+                  "images/products/10.png",
+                  "images/products/11.png"
+                ],
                 "features": [
-                    "Площадь: 25 м²",
+                    "Площадь: 100 м²",
                     "Кабинет руководителя",
                     "Переговорная",
                     "Санузел",
@@ -290,63 +294,14 @@ class DatabaseAPI {
                 "sale": null,
                 "description": "Элитный офисный модуль для руководителя. Всё для продуктивной работы.",
                 "specifications": {
-                    "area": "25",
-                    "rooms": "2",
+                    "area": "100",
+                    "rooms": "3",
                     "bathroom": "Совмещенный",
                     "ac": "Инверторный",
                     "furniture": "Премиум"
                 }
-                },
-                {
-                "id": 10,
-                "category": "houses",
-                "title": "Дом \"Мини\" 32 м²",
-                "price": "950 000 ₽",
-                "oldPrice": null,
-                "image": "images/products/10.png",
-                "features": [
-                    "Площадь: 32 м²",
-                    "Спальня + гостиная",
-                    "Компактная кухня",
-                    "Санузел",
-                    "Идеально для дачи"
-                ],
-                "badge": "Акция",
-                "sale": "-10%",
-                "description": "Уютный компактный дом для небольшой семьи или пары. Все необходимое для комфорта.",
-                "specifications": {
-                    "area": "32",
-                    "rooms": "2",
-                    "kitchen": "Компактная",
-                    "bathroom": "Совмещенный",
-                    "heating": "Конвекторы"
                 }
-                },
-                {
-                "id": 11,
-                "category": "storage",
-                "title": "Складской модуль 50 м²",
-                "price": "550 000 ₽",
-                "oldPrice": null,
-                "image": "images/products/11.png",
-                "features": [
-                    "Площадь: 50 м²",
-                    "Складское помещение",
-                    "Ворота 3м",
-                    "Электричество",
-                    "Система вентиляции"
-                ],
-                "badge": "Спеццена",
-                "sale": null,
-                "description": "Профессиональное складское помещение для бизнеса. Большая площадь и удобный доступ.",
-                "specifications": {
-                    "area": "50",
-                    "gates": "3x3 м",
-                    "ventilation": "Принудительная",
-                    "lighting": "Промышленное",
-                    "racks": "Опционально"
-                }
-                }
+
                 
 
             ];
@@ -375,7 +330,7 @@ class DatabaseAPI {
             
                         // Fallback контакты
             this.contacts = {
-                address: "Новосибирск, ул.",
+                address: "г. Новосибирск, Мочищенское шоссе, 1/4",
                 phone: "+7 (923) 226-11-02",
                 email: "СибМодулинг@gmail.com",
                 schedule: {

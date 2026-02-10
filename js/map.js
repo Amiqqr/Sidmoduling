@@ -83,8 +83,8 @@ class MapManager {
         
         // Координаты Новосибирска
         const defaultLocation = {
-            lat: 54.859979,
-            lng: 83.084157,
+            lat: 55.095863,
+            lng: 82.892402,
             address: "г. Новосибирск, ул. Строителей, 15"
         };
         
@@ -165,7 +165,7 @@ class MapManager {
                 <h3>Карта проезда</h3>
                 <div class="fullscreen-map">
                     <iframe 
-                        src="https://yandex.ru/map-widget/v1/?ll=82.9357,55.0084&z=16&pt=82.9357,55.0084,pm2rdm&mode=search&text=${encodeURIComponent('г. Новосибирск, ул. Строителей, 15')}"
+                        src="https://yandex.ru/map-widget/v1/?ll=82.892402,55.095863&z=16&pt=82.892402,55.095863,pm2rdm&mode=search&text=${encodeURIComponent('г. Новосибирск, ул. Строителей, 15')}"
                         width="100%" 
                         height="100%" 
                         frameborder="0" 
@@ -296,7 +296,7 @@ class MapManager {
     
     showRouteToOffice(userLocation) {
         // Показать маршрут от пользователя до офиса
-        const officeLocation = { lat: 55.0084, lng: 82.9357 };
+        const officeLocation = { lat: 55.095863, lng: 82.892402 };
         
         const modal = document.createElement('div');
         modal.className = 'modal active';
@@ -396,7 +396,7 @@ class MapManager {
     downloadRouteMap() {
         // Создаем ссылку для скачивания
         const link = document.createElement('a');
-        link.href = 'https://static-maps.yandex.ru/1.x/?ll=82.9357,55.0084&z=16&l=map&pt=82.9357,55.0084,pm2rdm';
+        link.href = 'https://static-maps.yandex.ru/1.x/?ll=82.892402,55.095863&z=16&l=map&pt=82.892402,55.095863,pm2rdm';
         link.download = 'schema-proezda-sibmoduling.png';
         link.click();
     }
