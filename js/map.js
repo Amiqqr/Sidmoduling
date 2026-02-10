@@ -38,11 +38,11 @@ class MapManager {
         const mapContainer = document.getElementById('mapContainer');
         if (!mapContainer) return;
         
-        // Координаты Новосибирска
+        // Координаты Новосибирск, Мочищенское шоссе, 1/4к7
         const defaultLocation = {
             lat: 55.095863,
             lng: 82.892402,
-            address: "г. Новосибирск, ул. Строителей, 15"
+            address: "г. Новосибирск, Мочищенское шоссе, 1/4к7"
         };
         
         // Создаем iframe с картой Яндекс
@@ -81,17 +81,17 @@ class MapManager {
         const mapContainer = document.getElementById('mapContainer');
         if (!mapContainer) return;
         
-        // Координаты Новосибирска
+        // Координаты Новосибирск, Мочищенское шоссе, 1/4к7
         const defaultLocation = {
             lat: 55.095863,
             lng: 82.892402,
-            address: "г. Новосибирск, ул. Строителей, 15"
+            address: "г. Новосибирск, Мочищенское шоссе, 1/4к7"
         };
         
         // Создаем iframe с картой Google Maps
         const mapHtml = `
             <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2286.25123456789!2d${defaultLocation.lng}!3d${defaultLocation.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTXCsDAwJzMwLjIiTiA4MsKwNTYnMDguNSJF!5e0!3m2!1sru!2sru!4v${Date.now()}"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2286.25123456789!2d${defaultLocation.lng}!3d${defaultLocation.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTXCsDA1JzQ1LjEiTiA4MsKwNTMnMzIuNiJF!5e0!3m2!1sru!2sru!4v${Date.now()}&q=${encodeURIComponent(defaultLocation.address)}"
                 width="100%" 
                 height="100%" 
                 style="border:0;" 
@@ -165,7 +165,7 @@ class MapManager {
                 <h3>Карта проезда</h3>
                 <div class="fullscreen-map">
                     <iframe 
-                        src="https://yandex.ru/map-widget/v1/?ll=82.892402,55.095863&z=16&pt=82.892402,55.095863,pm2rdm&mode=search&text=${encodeURIComponent('г. Новосибирск, ул. Строителей, 15')}"
+                        src="https://yandex.ru/map-widget/v1/?ll=82.892402,55.095863&z=16&pt=82.892402,55.095863,pm2rdm&mode=search&text=${encodeURIComponent('г. Новосибирск, Мочищенское шоссе, 1/4к7')}"
                         width="100%" 
                         height="100%" 
                         frameborder="0" 
@@ -175,9 +175,9 @@ class MapManager {
                     ></iframe>
                 </div>
                 <div class="map-instructions">
-                    <p><i class="fas fa-subway"></i> Метро:</p>
-                    <p><i class="fas fa-bus"></i> Автобусы:</p>
-                    <p><i class="fas fa-car"></i> Бесплатная парковка у ворот</p>
+                    <p><i class="fas fa-car"></i> Бесплатная парковка для клиентов</p>
+                    <p><i class="fas fa-road"></i> Мочищенское шоссе, 1/4к7</p>
+                    <p><i class="fas fa-clock"></i> Пн-Пт: 9:00-20:00, Сб-Вс: 10:00-18:00</p>
                 </div>
             </div>
         `;
