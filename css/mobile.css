@@ -1,10 +1,18 @@
-/* mobile.css - ИСПРАВЛЕННАЯ И ОПТИМИЗИРОВАННАЯ ВЕРСИЯ */
+/* mobile.css - ГОСТ-совместимая версия */
 @media (max-width: 992px) {
     :root {
         --header-height: 70px;
     }
-    
-    /* ОСНОВНЫЕ СТИЛИ ДЛЯ МОБИЛЬНОЙ КНОПКИ МЕНЮ */
+
+    /* Логотип - ИСПРАВЛЕНО для мобильной версии */
+    .logo-img {
+        height: 60px; /* Чуть уменьшен для мобильных */
+        width: auto;  /* Ширина автоматически, чтобы не сжималось */
+        max-width: 100%; /* Не выходит за границы */
+        object-fit: contain; /* Гарантирует сохранение пропорций */
+    }
+
+    /* Mobile menu button */
     .mobile-menu-btn {
         display: flex !important;
         align-items: center;
@@ -22,23 +30,28 @@
         z-index: 1001;
         transition: all 0.3s ease;
     }
-    
-    /* Ховер-эффект для кнопки */
+
+    /* Focus state for mobile menu button */
+    .mobile-menu-btn:focus-visible {
+        outline: 3px solid var(--focus-color);
+        outline-offset: 2px;
+        border-color: var(--focus-color);
+    }
+
     .mobile-menu-btn:hover {
         background: var(--accent-teal);
         color: white;
         border-color: var(--accent-teal);
         transform: scale(1.05);
     }
-    
-    /* Когда меню активно (открыто) */
+
     .mobile-menu-btn.active {
         background: var(--accent-teal);
         color: white;
         border-color: var(--accent-teal);
     }
-    
-    /* СТИЛИ МЕНЮ */
+
+    /* Navigation menu */
     .nav-menu {
         position: fixed !important;
         top: var(--header-height) !important;
@@ -56,7 +69,7 @@
         max-height: 0;
         overflow: hidden;
     }
-    
+
     .nav-menu.active {
         transform: translateY(0) !important;
         opacity: 1 !important;
@@ -64,77 +77,143 @@
         max-height: calc(100vh - var(--header-height));
         overflow-y: auto;
     }
-    
+
     .nav-menu li {
         width: 100%;
         text-align: center;
     }
-    
+
     .nav-link {
         display: block;
         padding: 15px 0;
         font-size: 1.2rem;
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
+        color: var(--dark-text);
+        font-weight: 500;
     }
-    
+
     .nav-link:hover {
         color: var(--accent-teal);
-        background: rgba(255, 140, 0, 0.05);
+        background: rgba(230, 126, 34, 0.05);
         padding-left: 10px;
     }
-    
+
+    .nav-link:focus-visible {
+        outline: 3px solid var(--focus-color);
+        outline-offset: -2px;
+    }
+
+    .nav-link.active {
+        color: var(--primary-dark);
+        font-weight: 700;
+        background: rgba(196, 81, 30, 0.05);
+    }
+
     .nav-link:last-child {
         border-bottom: none;
     }
-    
-    /* Скрыть кнопку консультации в мобильной версии */
+
+    /* Hide consultation button in mobile menu */
     .nav-cta {
         display: none !important;
     }
-    
-    /* ГЛАВНЫЙ ЭКРАН */
+
+    /* Hero section */
     .hero {
         padding-top: var(--header-height);
     }
-    
+
     .hero h1 {
         font-size: 2.8rem;
     }
-    
-    /* КАТАЛОГ */
+
+    .hero-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .stat-item {
+        width: 100%;
+        min-width: auto;
+    }
+
+    /* Catalog */
     .catalog-grid {
         grid-template-columns: 1fr;
     }
-    
-    /* О НАС */
+
+    .catalog-tabs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tab-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* About */
     .about-content {
         grid-template-columns: 1fr;
         gap: 40px;
     }
-    
-    /* КОНТАКТЫ */
+
+    /* Contact */
     .contact-container {
         grid-template-columns: 1fr;
         gap: 30px;
     }
-    
-    /* ФОРМА КОНСУЛЬТАЦИИ */
+
+    .contact-info {
+        padding: 30px;
+    }
+
+    .contact-cta {
+        flex-direction: column;
+    }
+
+    .contact-cta .btn-primary,
+    .contact-cta .btn-secondary {
+        width: 100%;
+    }
+
+    .map-wrapper {
+        padding: 30px;
+    }
+
+    .map-container {
+        height: 300px;
+    }
+
+    /* Consultation form */
     .consultation-form {
         padding: 40px 20px;
     }
-    
-    /* ПРОЦЕСС */
+
+    /* Process */
     .process-steps {
         grid-template-columns: 1fr;
         gap: 30px;
     }
-    
-    /* ФУТЕР */
+
+    .process-step {
+        padding: 15px;
+    }
+
+    /* Footer */
     .footer-content {
         grid-template-columns: 1fr;
         gap: 30px;
         text-align: center;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    .footer-contact-info li {
+        justify-content: center;
     }
 }
 
@@ -142,31 +221,62 @@
     :root {
         --header-height: 60px;
     }
-    
+
     .hero h1 {
         font-size: 2.2rem;
     }
-    
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+
     .hero-cta {
         flex-direction: column;
         width: 100%;
         gap: 15px;
     }
-    
+
     .btn-primary,
     .btn-secondary {
         width: 100%;
         justify-content: center;
     }
-    
+
+    .section-title h2 {
+        font-size: 2rem;
+    }
+
+    .section-title p {
+        font-size: 1rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
     .product-actions {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .btn-small {
         width: 100%;
-        margin-bottom: 5px;
+    }
+
+    .contact-bottom {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        padding: 30px 20px;
+    }
+
+    /* Стили для чекбокса на мобильных */
+    .form-group-checkbox {
+        align-items: flex-start;
+    }
+    .form-checkbox {
+        margin-top: 3px;
     }
 }
 
@@ -174,50 +284,100 @@
     .hero h1 {
         font-size: 1.8rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1rem;
     }
-    
-    .hero-stats {
-        gap: 15px;
-    }
-    
-    .stat-item {
-        min-width: 90px;
-    }
-    
+
     .stat-number {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
-    
+
     .stat-label {
-        font-size: 0.7rem;
+        font-size: 0.8rem;
     }
-    
+
     .section-title h2 {
         font-size: 1.6rem;
     }
-    
-    .section-title p {
+
+    .product-title {
+        font-size: 1.2rem;
+    }
+
+    .current-price {
+        font-size: 1.5rem;
+    }
+
+    .consultation-form h2 {
+        font-size: 1.6rem;
+    }
+
+    .form-subtitle {
         font-size: 1rem;
+    }
+
+    .footer-column h3 {
+        font-size: 1.2rem;
     }
 }
 
-/* ИСПРАВЛЕНИЯ ДЛЯ iOS */
+/* iOS specific fixes */
 @supports (-webkit-touch-callout: none) {
     .nav-menu {
         -webkit-overflow-scrolling: touch;
     }
+
+    .hero {
+        background-attachment: scroll;
+    }
 }
 
-/* УЛУЧШЕНИЕ ДОСТУПНОСТИ ДЛЯ КАСАНИЙ */
+/* Touch device optimizations */
 @media (pointer: coarse) {
     .mobile-menu-btn,
     .nav-link,
     .btn-primary,
-    .btn-secondary {
+    .btn-secondary,
+    .btn-small,
+    .tab-btn,
+    .social-link {
         min-height: 44px;
         min-width: 44px;
+    }
+
+    .nav-link {
+        padding: 15px 0;
+    }
+}
+
+/* Landscape mode */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        min-height: auto;
+        padding: 100px 0 50px;
+    }
+
+    .hero-stats {
+        flex-direction: row;
+    }
+
+    .nav-menu.active {
+        max-height: 80vh;
+    }
+}
+
+/* High contrast mode for mobile */
+@media (prefers-contrast: high) {
+    .mobile-menu-btn {
+        border: 3px solid black;
+    }
+
+    .nav-menu {
+        border: 2px solid black;
+    }
+
+    .nav-link {
+        border-bottom: 2px solid black;
     }
 }

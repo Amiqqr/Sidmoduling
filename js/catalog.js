@@ -1,79 +1,217 @@
-// Класс для управления каталогом
+// catalog.js - ПОЛНОСТЬЮ ПЕРЕПИСАННАЯ ВЕРСИЯ, СООТВЕТСТВУЮЩАЯ ГОСТ Р 52872-2019
+// Класс для управления каталогом с полной поддержкой доступности
+
 class CatalogManager {
     constructor() {
+        // Основные свойства
         this.currentCategory = 'all';
         this.products = [];
         this.filteredProducts = [];
         this.currentProductDetails = null;
+        
+        // Для пагинации характеристик
         this.currentFeaturePage = 0;
-        this.currentImageIndex = 0;
         this.featuresPerPage = 5;
+        
+        // Для галереи изображений
+        this.currentImageIndex = 0;
+        this.images = [];
+        
+        // Для accessibility
+        this.liveRegion = null;
+        this.announceTimeout = null;
+        
+        // Инициализация
         this.init();
     }
     
+    /**
+     * Главный метод инициализации
+     */
     async init() {
+        console.log('📦 Инициализация каталога (ГОСТ-версия)');
+        
+        // Создаем live region для скринридеров
+        this.createLiveRegion();
+        
         // Инициализация базы данных
         await Database.init();
         
-        console.log('Каталог: Загружено товаров из базы:', Database.products.length);
+        console.log('📊 Каталог: Загружено товаров из базы:', Database.products.length);
         
         // Загрузка продуктов
         await this.loadProducts();
         
-        console.log('Каталог: Отфильтровано товаров:', this.filteredProducts.length);
+        console.log('📊 Каталог: Отфильтровано товаров:', this.filteredProducts.length);
         
         // Инициализация событий
         this.initEvents();
         
         // Инициализация анимаций
         this.initAnimations();
+        
+        // Объявляем о готовности
+        this.announceToScreenReader('Каталог загружен. Доступно ' + this.filteredProducts.length + ' товаров.');
+        
+        console.log('✅ Каталог успешно инициализирован');
     }
     
+    /**
+     * Создание live region для скринридеров
+     */
+    createLiveRegion() {
+        this.liveRegion = document.createElement('div');
+        this.liveRegion.setAttribute('aria-live', 'polite');
+        this.liveRegion.setAttribute('aria-atomic', 'true');
+        this.liveRegion.className = 'sr-only';
+        document.body.appendChild(this.liveRegion);
+    }
+    
+    /**
+     * Объявление сообщений для скринридеров
+     */
+    announceToScreenReader(message) {
+        if (!this.liveRegion) return;
+        
+        // Очищаем предыдущее сообщение
+        if (this.announceTimeout) {
+            clearTimeout(this.announceTimeout);
+        }
+        
+        this.announceTimeout = setTimeout(() => {
+            this.liveRegion.textContent = '';
+            
+            setTimeout(() => {
+                this.liveRegion.textContent = message;
+            }, 50);
+        }, 100);
+    }
+    
+    /**
+     * Загрузка продуктов
+     */
     async loadProducts(category = 'all') {
         this.currentCategory = category;
         
-        // Показать загрузку
+        // Показать индикатор загрузки
         this.showLoading();
         
-        // Загрузить продукты
-        this.products = await Database.loadProducts(category);
-        this.filteredProducts = [...this.products];
-        
-        console.log('Каталог loadProducts: Загружено', this.products.length, 'товаров категории', category);
-        
-        // Отрисовать продукты
-        this.renderProducts();
-        
-        // Скрыть загрузку
-        this.hideLoading();
+        try {
+            // Загрузить продукты
+            this.products = await Database.loadProducts(category);
+            this.filteredProducts = [...this.products];
+            
+            console.log(`📦 Загружено ${this.products.length} товаров категории "${category}"`);
+            
+            // Отрисовать продукты
+            this.renderProducts();
+            
+            // Объявить скринридеру
+            this.announceToScreenReader(`Категория "${this.getCategoryDisplayName(category)}" загружена. Найдено ${this.filteredProducts.length} товаров.`);
+            
+        } catch (error) {
+            console.error('❌ Ошибка загрузки продуктов:', error);
+            this.showError('Не удалось загрузить товары. Пожалуйста, обновите страницу.');
+        } finally {
+            // Скрыть индикатор загрузки
+            this.hideLoading();
+        }
     }
     
+    /**
+     * Показать индикатор загрузки
+     */
     showLoading() {
         const catalogGrid = document.getElementById('catalogGrid');
         if (!catalogGrid) return;
         
         catalogGrid.innerHTML = `
-            <div class="loading-spinner" style="grid-column: 1 / -1; text-align: center; padding: 60px;">
-                <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--accent-teal);"></i>
+            <div class="loading-spinner" 
+                 style="grid-column: 1 / -1; text-align: center; padding: 60px;"
+                 role="status" 
+                 aria-live="polite">
+                <i class="fas fa-spinner fa-spin fa-3x" aria-hidden="true" style="color: var(--accent-teal);"></i>
                 <p style="margin-top: 20px; color: var(--gray-text);">Загрузка каталога...</p>
+                <span class="sr-only">Загрузка товаров, пожалуйста подождите</span>
             </div>
         `;
     }
     
+    /**
+     * Скрыть индикатор загрузки
+     */
     hideLoading() {
-        // Анимация загрузки будет скрыта при рендере
+        // Индикатор будет скрыт при рендере
     }
     
+    /**
+     * Показать ошибку
+     */
+    showError(message) {
+        const catalogGrid = document.getElementById('catalogGrid');
+        if (!catalogGrid) return;
+        
+        catalogGrid.innerHTML = `
+            <div class="error-message" 
+                 style="grid-column: 1 / -1; text-align: center; padding: 60px;"
+                 role="alert"
+                 aria-live="assertive">
+                <i class="fas fa-exclamation-circle fa-3x" aria-hidden="true" style="color: #dc3545; margin-bottom: 20px;"></i>
+                <h3 style="color: var(--dark-text); margin-bottom: 10px;">Ошибка загрузки</h3>
+                <p style="color: var(--gray-text);">${message}</p>
+                <button class="btn-primary" onclick="catalog.loadProducts('${this.currentCategory}')" style="margin-top: 20px;">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                    <span>Повторить попытку</span>
+                </button>
+            </div>
+        `;
+        
+        this.announceToScreenReader('Ошибка загрузки: ' + message);
+    }
+    
+    /**
+     * Получение отображаемого имени категории
+     */
+    getCategoryDisplayName(category) {
+        const categories = {
+            'all': 'все товары',
+            'houses': 'модульные дома',
+            'offices': 'офисные модули',
+            'storage': 'бытовки',
+            'promo': 'акции'
+        };
+        return categories[category] || category;
+    }
+    
+    /**
+     * Получение имени категории для отображения
+     */
+    getCategoryName(category) {
+        const categories = {
+            'houses': 'Модульные дома',
+            'offices': 'Офисные модули',
+            'storage': 'Бытовки',
+            'promo': 'Акции'
+        };
+        return categories[category] || category;
+    }
+    
+    /**
+     * Отрисовка продуктов
+     */
     renderProducts() {
         const catalogGrid = document.getElementById('catalogGrid');
         if (!catalogGrid) return;
         
-        console.log('Каталог renderProducts: Отрисовка', this.filteredProducts.length, 'товаров');
+        console.log(`🎨 Отрисовка ${this.filteredProducts.length} товаров`);
         
         if (this.filteredProducts.length === 0) {
             catalogGrid.innerHTML = `
-                <div class="empty-catalog" style="grid-column: 1 / -1; text-align: center; padding: 60px;">
-                    <i class="fas fa-box-open fa-3x" style="color: var(--gray-text); margin-bottom: 20px;"></i>
+                <div class="empty-catalog" 
+                     style="grid-column: 1 / -1; text-align: center; padding: 60px;"
+                     role="status"
+                     aria-live="polite">
+                    <i class="fas fa-box-open fa-3x" aria-hidden="true" style="color: var(--gray-text); margin-bottom: 20px;"></i>
                     <h3 style="color: var(--dark-text); margin-bottom: 10px;">Товары не найдены</h3>
                     <p style="color: var(--gray-text);">Попробуйте выбрать другую категорию</p>
                 </div>
@@ -81,8 +219,10 @@ class CatalogManager {
             return;
         }
         
+        // Очищаем контейнер
         catalogGrid.innerHTML = '';
         
+        // Создаем карточки товаров
         this.filteredProducts.forEach((product, index) => {
             const productCard = this.createProductCard(product, index);
             catalogGrid.appendChild(productCard);
@@ -94,51 +234,96 @@ class CatalogManager {
         }, 100);
     }
     
+    /**
+     * Создание карточки товара с поддержкой доступности
+     */
     createProductCard(product, index) {
-        const card = document.createElement('div');
+        // Используем article вместо div для семантики
+        const card = document.createElement('article');
         card.className = 'product-card animate-on-scroll';
         card.dataset.id = product.id;
         card.dataset.category = product.category;
         card.style.animationDelay = `${index * 0.1}s`;
         
-        // Используем первое изображение для карточки
-        const mainImage = product.images?.[0] || product.image || 'https://via.placeholder.com/350x250/FF8C00/FFFFFF?text=Изображение+товара';
+        // ARIA атрибуты для доступности
+        const titleId = `product-title-${product.id}`;
+        const descId = `product-desc-${product.id}`;
+        
+        card.setAttribute('aria-labelledby', titleId);
+        card.setAttribute('aria-describedby', descId);
+        card.setAttribute('role', 'article');
+        
+        // Основное изображение
+        const mainImage = product.images?.[0] || product.image || 'https://via.placeholder.com/350x250/FFFFFF/333333?text=Изображение+товара';
         
         // Формирование HTML карточки
         card.innerHTML = `
-            ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
-            ${product.sale ? `<div class="sale-badge" style="position: absolute; top: 20px; left: 20px; background: #FF8C00; color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; z-index: 2; box-shadow: 0 4px 12px rgba(216, 151, 0, 0.3);">${product.sale}</div>` : ''}
+            ${product.badge ? `
+                <div class="product-badge" aria-label="Особенность: ${product.badge}">
+                    ${product.badge}
+                </div>
+            ` : ''}
+            
+            ${product.sale ? `
+                <div class="sale-badge" aria-label="Скидка: ${product.sale}">
+                    ${product.sale}
+                </div>
+            ` : ''}
             
             <div class="product-image-container">
-                <img src="${mainImage}" alt="${product.title}" class="product-image" loading="lazy" onerror="this.src='https://via.placeholder.com/350x250/FF8C00/FFFFFF?text=Изображение+товара'">
-                ${(product.images?.length || 0) > 1 ? `
-                ` : ''}
+                <img src="${mainImage}" 
+                     alt="${product.title} - основное изображение" 
+                     class="product-image" 
+                     loading="lazy"
+                     onerror="this.src='https://via.placeholder.com/350x250/FFFFFF/333333?text=Изображение+товара'">
             </div>
             
             <div class="product-content">
-                <div class="product-category">${this.getCategoryName(product.category)}</div>
-                <h3 class="product-title">${product.title}</h3>
-                
-                <div class="product-price">
-                    <span class="current-price">${product.price}</span>
-                    ${product.oldPrice ? `<span class="product-old-price">${product.oldPrice}</span>` : ''}
+                <div class="product-category" aria-label="Категория: ${this.getCategoryName(product.category)}">
+                    ${this.getCategoryName(product.category)}
                 </div>
                 
-                <ul class="product-features">
+                <h3 class="product-title" id="${titleId}">${product.title}</h3>
+                
+                <div class="product-price" aria-label="Цена: ${product.price}">
+                    <span class="current-price">${product.price}</span>
+                    ${product.oldPrice ? `
+                        <span class="product-old-price" aria-label="Старая цена: ${product.oldPrice}">
+                            ${product.oldPrice}
+                        </span>
+                    ` : ''}
+                </div>
+                
+                <div class="product-features" id="${descId}">
                     ${product.features.slice(0, 3).map(feature => `
-                        <li><i class="fas fa-check"></i>${feature}</li>
+                        <li>
+                            <i class="fas fa-check" aria-hidden="true"></i>
+                            <span>${feature}</span>
+                        </li>
                     `).join('')}
-                    ${product.features.length > 3 ? '<li><i class="fas fa-ellipsis-h"></i>Еще ' + (product.features.length - 3) + ' характеристик...</li>' : ''}
-                </ul>
+                    
+                    ${product.features.length > 3 ? `
+                        <li aria-hidden="true">
+                            <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                            <span>Еще ${product.features.length - 3} характеристик...</span>
+                        </li>
+                    ` : ''}
+                </div>
                 
                 <div class="product-actions">
-                    <a href="#consultation" class="btn-small btn-buy" onclick="catalog.setProductForConsultation(${product.id}); return false;">
-                        <i class="fas fa-shopping-cart"></i>
-                        Заказать
+                    <a href="#consultation" 
+                       class="btn-small btn-buy" 
+                       onclick="catalog.setProductForConsultation(${product.id}); return false;"
+                       aria-label="Заказать ${product.title}">
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                        <span>Заказать</span>
                     </a>
-                    <button class="btn-small btn-details" onclick="catalog.showProductDetails(${product.id})">
-                        <i class="fas fa-images"></i>
-                        Подробнее
+                    
+                    <button class="btn-small btn-details" 
+                            onclick="catalog.showProductDetails(${product.id})"
+                            aria-label="Подробнее о товаре ${product.title}">
+                        <i class="fas fa-images" aria-hidden="true"></i>
+                        <span>Подробнее</span>
                     </button>
                 </div>
             </div>
@@ -147,44 +332,55 @@ class CatalogManager {
         return card;
     }
     
-    getCategoryName(category) {
-        const categories = {
-            'houses': 'Модульные дома',
-            'offices': 'Офисные модули',
-            'storage': 'Бытовки',
-            'promo': 'Акции'
-        };
-        return categories[category] || category;
-    }
-    
+    /**
+     * Инициализация событий
+     */
     initEvents() {
-        // Обработчики вкладок
-        document.querySelectorAll('.tab-btn').forEach(btn => {
+        // Обработчики вкладок категорий
+        const tabs = document.querySelectorAll('.tab-btn');
+        
+        tabs.forEach(btn => {
             btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                
                 // Обновить активную вкладку
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                tabs.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                
                 btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
                 
                 // Загрузить продукты выбранной категории
-                this.loadProducts(btn.dataset.category);
+                this.loadProducts(category);
                 
                 // Прокрутить к каталогу
                 this.scrollToCatalog();
+                
+                // Объявить скринридеру
+                this.announceToScreenReader(`Выбрана категория: ${this.getCategoryDisplayName(category)}`);
             });
+            
+            // Устанавливаем ARIA атрибуты для вкладок
+            btn.setAttribute('role', 'tab');
+            btn.setAttribute('aria-selected', btn.classList.contains('active') ? 'true' : 'false');
         });
         
-        // Принудительная перезагрузка для отладки
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'r') {
-                e.preventDefault();
-                console.log('Принудительная перезагрузка каталога');
-                this.loadProducts(this.currentCategory);
-            }
-        });
+        // Устанавливаем ARIA атрибуты для контейнера вкладок
+        const tabContainer = document.getElementById('catalogTabs');
+        if (tabContainer) {
+            tabContainer.setAttribute('role', 'tablist');
+            tabContainer.setAttribute('aria-label', 'Категории товаров');
+        }
+        
+        console.log('✅ События каталога инициализированы');
     }
     
+    /**
+     * Инициализация анимаций
+     */
     initAnimations() {
-        // Инициализация наблюдателя для анимаций
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -192,16 +388,19 @@ class CatalogManager {
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
         
-        // Наблюдать за всеми элементами с анимацией
         document.querySelectorAll('.animate-on-scroll').forEach(el => {
             observer.observe(el);
         });
     }
     
+    /**
+     * Инициализация анимаций для продуктов
+     */
     initProductAnimations() {
         const cards = document.querySelectorAll('.product-card');
+        
         cards.forEach((card, index) => {
             card.style.opacity = '0';
             card.style.transform = 'translateY(30px)';
@@ -214,30 +413,48 @@ class CatalogManager {
         });
     }
     
+    /**
+     * Поиск продуктов
+     */
     searchProducts(query) {
         if (!query.trim()) {
             this.filteredProducts = [...this.products];
         } else {
             this.filteredProducts = Database.searchProducts(query, this.currentCategory);
         }
+        
         this.renderProducts();
+        
+        this.announceToScreenReader(`Поиск "${query}" завершен. Найдено ${this.filteredProducts.length} товаров.`);
     }
     
+    /**
+     * Прокрутка к каталогу
+     */
     scrollToCatalog() {
         const catalogSection = document.getElementById('catalog');
         if (catalogSection) {
             const headerHeight = document.querySelector('header').offsetHeight;
+            
             window.scrollTo({
                 top: catalogSection.offsetTop - headerHeight - 20,
                 behavior: 'smooth'
             });
+            
+            // Устанавливаем фокус на заголовок каталога
+            setTimeout(() => {
+                catalogSection.setAttribute('tabindex', '-1');
+                catalogSection.focus({ preventScroll: true });
+            }, 500);
         }
     }
     
-    // Установка продукта для консультации
+    /**
+     * Установка продукта для консультации
+     */
     setProductForConsultation(productId) {
         const product = this.products.find(p => p.id == productId);
-        if (!product) return;
+        if (!product) return false;
         
         const productSelect = document.getElementById('product');
         if (productSelect) {
@@ -245,6 +462,7 @@ class CatalogManager {
             const option = document.createElement('option');
             option.value = `product_${productId}`;
             option.textContent = product.title;
+            option.selected = true;
             
             // Удаляем предыдущие опции продуктов
             const existingOptions = productSelect.querySelectorAll('option[value^="product_"]');
@@ -252,85 +470,157 @@ class CatalogManager {
             
             // Добавляем новую опцию
             productSelect.appendChild(option);
-            productSelect.value = option.value;
+            
+            // Объявляем скринридеру
+            this.announceToScreenReader(`Выбран товар: ${product.title}. Переход к форме заявки.`);
         }
         
         // Прокручиваем к форме
         setTimeout(() => {
-            document.getElementById('consultation').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start' 
-            });
+            const consultationSection = document.getElementById('consultation');
+            if (consultationSection) {
+                consultationSection.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start' 
+                });
+                
+                // Устанавливаем фокус на форму
+                setTimeout(() => {
+                    const nameInput = document.getElementById('name');
+                    if (nameInput) nameInput.focus();
+                }, 500);
+            }
         }, 100);
         
         return false;
     }
     
-    // Показать детали продукта с галереей изображений
+    /**
+     * Показать детали продукта с галереей изображений
+     */
     async showProductDetails(productId) {
         const product = await Database.getProductById(productId);
+        
         if (!product) {
             alert('Информация о товаре не найдена');
+            this.announceToScreenReader('Ошибка: информация о товаре не найдена');
             return;
         }
         
         this.currentProductDetails = product;
         this.currentFeaturePage = 0;
         this.currentImageIndex = 0;
+        this.images = product.images || [product.image || 'https://via.placeholder.com/500x350/FFFFFF/333333?text=Изображение+товара'];
         
-        // Создание модального окна с галереей изображений и пагинацией характеристик
+        // Создание модального окна
         this.createProductModal(product);
+        
+        // Объявляем скринридеру
+        this.announceToScreenReader(`Открыты детали товара: ${product.title}. Используйте стрелки для навигации по изображениям.`);
     }
     
+    /**
+     * Создание модального окна с деталями товара
+     */
     createProductModal(product) {
+        // Удаляем предыдущее модальное окно если есть
+        const existingModal = document.querySelector('.product-details-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
         const modal = document.createElement('div');
-        modal.className = 'modal active';
+        modal.className = 'modal active product-details-modal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'modal-product-title');
+        modal.setAttribute('aria-describedby', 'modal-product-desc');
+        
+        const totalPages = Math.ceil((product.features?.length || 0) / this.featuresPerPage);
+        
         modal.innerHTML = `
-            <div class="modal-content product-details-modal">
-                <button class="modal-close" onclick="catalog.closeProductModal()">
-                    <i class="fas fa-times"></i>
+            <div class="modal-content product-details-content">
+                <button class="modal-close" onclick="catalog.closeProductModal()" 
+                        aria-label="Закрыть окно деталей товара">
+                    <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
                 
                 <div class="product-details-container">
                     <div class="product-details-image">
                         <div class="main-image-container">
-                            <img src="${product.images?.[0] || product.image || 'https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'}" 
-                                 alt="${product.title}" 
+                            <img src="${this.images[0]}" 
+                                 alt="${product.title} - изображение 1 из ${this.images.length}" 
                                  id="mainProductImage"
-                                 onerror="this.src='https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'">
-                            <div class="image-counter">
-                                <span id="currentImageIndex">1</span> / <span id="totalImages">${product.images?.length || 1}</span>
+                                 class="main-product-image"
+                                 onerror="this.src='https://via.placeholder.com/500x350/FFFFFF/333333?text=Изображение+товара'">
+                            
+                            <div class="image-counter" aria-live="polite">
+                                <span id="currentImageIndex">1</span> / <span id="totalImages">${this.images.length}</span>
+                                <span class="sr-only">изображение</span>
                             </div>
                         </div>
                         
-                        <div class="image-nav">
-                            <button class="image-nav-btn prev-btn" onclick="catalog.prevImage()" ${(product.images?.length || 1) <= 1 ? 'disabled' : ''}>
-                                <i class="fas fa-chevron-left"></i>
+                        <div class="image-nav" role="group" aria-label="Навигация по изображениям">
+                            <button class="image-nav-btn prev-btn" 
+                                    onclick="catalog.prevImage()" 
+                                    ${this.images.length <= 1 ? 'disabled' : ''}
+                                    aria-label="Предыдущее изображение">
+                                <i class="fas fa-chevron-left" aria-hidden="true"></i>
                             </button>
-                            <button class="image-nav-btn next-btn" onclick="catalog.nextImage()" ${(product.images?.length || 1) <= 1 ? 'disabled' : ''}>
-                                <i class="fas fa-chevron-right"></i>
+                            
+                            <button class="image-nav-btn next-btn" 
+                                    onclick="catalog.nextImage()" 
+                                    ${this.images.length <= 1 ? 'disabled' : ''}
+                                    aria-label="Следующее изображение">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
                             </button>
                         </div>
                         
                         <!-- Миниатюры изображений -->
-                        <div class="image-thumbnails" id="imageThumbnails">
-                            <!-- Миниатюры будут загружены динамически -->
+                        <div class="image-thumbnails" id="imageThumbnails" role="list" aria-label="Миниатюры изображений">
+                            ${this.images.map((img, index) => `
+                                <button class="image-thumbnail ${index === 0 ? 'active' : ''}" 
+                                        onclick="catalog.changeImage(${index})"
+                                        data-index="${index}"
+                                        role="listitem"
+                                        aria-label="Переключить на изображение ${index + 1}"
+                                        aria-pressed="${index === 0 ? 'true' : 'false'}">
+                                    <img src="${img}" 
+                                         alt="Миниатюра ${index + 1}" 
+                                         onerror="this.src='https://via.placeholder.com/100x75/FFFFFF/333333?text=Миниатюра'">
+                                </button>
+                            `).join('')}
                         </div>
                     </div>
                     
-                    <div class="product-details-content">
-                        ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
+                    <div class="product-details-info">
+                        ${product.badge ? `
+                            <div class="product-badge" aria-label="Особенность: ${product.badge}">
+                                ${product.badge}
+                            </div>
+                        ` : ''}
                         
-                        <div class="product-category">${this.getCategoryName(product.category)}</div>
-                        <h2 class="product-title">${product.title}</h2>
-                        
-                        <div class="product-price-large">
-                            <span class="current-price">${product.price}</span>
-                            ${product.oldPrice ? `<span class="product-old-price">${product.oldPrice}</span>` : ''}
-                            ${product.sale ? `<span class="sale-badge">${product.sale}</span>` : ''}
+                        <div class="product-category" aria-label="Категория: ${this.getCategoryName(product.category)}">
+                            ${this.getCategoryName(product.category)}
                         </div>
                         
-                        <div class="product-description">
+                        <h2 class="product-title" id="modal-product-title">${product.title}</h2>
+                        
+                        <div class="product-price-large" aria-label="Цена: ${product.price}">
+                            <span class="current-price">${product.price}</span>
+                            ${product.oldPrice ? `
+                                <span class="product-old-price" aria-label="Старая цена: ${product.oldPrice}">
+                                    ${product.oldPrice}
+                                </span>
+                            ` : ''}
+                            ${product.sale ? `
+                                <span class="sale-badge" aria-label="Скидка: ${product.sale}">
+                                    ${product.sale}
+                                </span>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="product-description" id="modal-product-desc">
                             <h3>Описание</h3>
                             <p>${product.description || 'Подробное описание товара. Все характеристики указаны ниже.'}</p>
                         </div>
@@ -338,38 +628,55 @@ class CatalogManager {
                         <div class="product-features-section">
                             <div class="section-header">
                                 <h3>Характеристики</h3>
-                                <div class="features-nav">
-                                    <button class="features-nav-btn prev-features" onclick="catalog.prevFeaturesPage()" disabled>
-                                        <i class="fas fa-chevron-left"></i>
+                                
+                                <div class="features-nav" role="group" aria-label="Навигация по страницам характеристик">
+                                    <button class="features-nav-btn prev-features" 
+                                            onclick="catalog.prevFeaturesPage()" 
+                                            ${this.currentFeaturePage === 0 ? 'disabled' : ''}
+                                            aria-label="Предыдущая страница характеристик">
+                                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
                                     </button>
-                                    <span class="features-page-info">Страница <span id="currentPage">1</span> из <span id="totalPages">1</span></span>
-                                    <button class="features-nav-btn next-features" onclick="catalog.nextFeaturesPage()">
-                                        <i class="fas fa-chevron-right"></i>
+                                    
+                                    <span class="features-page-info" aria-live="polite">
+                                        Страница <span id="currentPage">1</span> из <span id="totalPages">${totalPages}</span>
+                                    </span>
+                                    
+                                    <button class="features-nav-btn next-features" 
+                                            onclick="catalog.nextFeaturesPage()" 
+                                            ${this.currentFeaturePage >= totalPages - 1 ? 'disabled' : ''}
+                                            aria-label="Следующая страница характеристик">
+                                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div class="features-container" id="featuresContainer">
+                            
+                            <div class="features-container" id="featuresContainer" aria-live="polite">
                                 <!-- Характеристики будут загружены динамически -->
                             </div>
                         </div>
                         
-                        <div class="product-specifications">
-                            ${product.specifications ? `
+                        ${product.specifications ? `
+                            <div class="product-specifications">
                                 <h3>Технические характеристики</h3>
                                 <div class="specs-grid" id="specsGrid">
-                                    <!-- Технические характеристики будут загружены динамически -->
+                                    ${this.renderSpecifications(product.specifications)}
                                 </div>
-                            ` : ''}
-                        </div>
+                            </div>
+                        ` : ''}
                         
                         <div class="product-actions-large">
-                            <button class="btn-primary" onclick="catalog.setProductForConsultation(${product.id}); catalog.closeProductModal();">
-                                <i class="fas fa-phone-alt"></i>
-                                Заказать консультацию
+                            <button class="btn-primary" 
+                                    onclick="catalog.setProductForConsultation(${product.id}); catalog.closeProductModal();"
+                                    aria-label="Заказать консультацию по товару ${product.title}">
+                                <i class="fas fa-phone-alt" aria-hidden="true"></i>
+                                <span>Заказать консультацию</span>
                             </button>
-                            <button class="btn-secondary" onclick="catalog.openFullscreenView()">
-                                <i class="fas fa-expand-arrows-alt"></i>
-                                Полноэкранный просмотр
+                            
+                            <button class="btn-secondary" 
+                                    onclick="catalog.openFullscreenView()"
+                                    aria-label="Открыть полноэкранный просмотр изображений">
+                                <i class="fas fa-expand-arrows-alt" aria-hidden="true"></i>
+                                <span>Полноэкранный просмотр</span>
                             </button>
                         </div>
                     </div>
@@ -379,19 +686,20 @@ class CatalogManager {
         
         document.body.appendChild(modal);
         
-        // Инициализация стилей для модального окна
-        this.initModalStyles();
+        // Добавляем стили для модального окна, если их нет
+        this.addModalStyles();
         
-        // Загрузка начальных данных
+        // Загружаем характеристики
         this.updateFeaturesDisplay();
-        this.updateSpecifications();
-        this.updateNavigationButtons();
-        this.updateImageThumbnails();
-        this.updateImageCounter();
-        this.updateImageNavigationButtons();
         
-        // Добавляем обработчики для клавиатуры
-        this.initModalKeyboardEvents();
+        // Инициализируем обработчики клавиатуры
+        this.initModalKeyboardEvents(modal);
+        
+        // Устанавливаем фокус на кнопку закрытия
+        setTimeout(() => {
+            const closeBtn = modal.querySelector('.modal-close');
+            if (closeBtn) closeBtn.focus();
+        }, 100);
         
         // Закрытие при клике на фон
         modal.addEventListener('click', (e) => {
@@ -401,20 +709,64 @@ class CatalogManager {
         });
     }
     
-    initModalStyles() {
+    /**
+     * Рендеринг характеристик
+     */
+    renderSpecifications(specs) {
+        if (!specs) return '';
+        
+        const translations = {
+            'area': 'Площадь',
+            'length': 'Длина',
+            'width': 'Ширина',
+            'height': 'Высота',
+            'weight': 'Вес',
+            'warranty': 'Гарантия',
+            'delivery': 'Доставка',
+            'assembly': 'Сборка',
+            'insulation': 'Утепление',
+            'floor_insulation': 'Утепление пола',
+            'wall_insulation': 'Утепление стен',
+            'frame': 'Каркас',
+            'nds_price': 'Цена с НДС',
+            'rooms': 'Комнат',
+            'bathroom': 'Санузел',
+            'ac': 'Кондиционер',
+            'furniture': 'Мебель'
+        };
+        
+        return Object.entries(specs).map(([key, value]) => {
+            const label = translations[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+            return `
+                <div class="spec-item">
+                    <span class="spec-key">${label}:</span>
+                    <span class="spec-value">${value}</span>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    /**
+     * Добавление стилей для модального окна
+     */
+    addModalStyles() {
+        if (document.getElementById('product-modal-styles')) return;
+        
         const style = document.createElement('style');
+        style.id = 'product-modal-styles';
         style.textContent = `
-            .product-details-modal {
-                max-width: 900px;
+            .product-details-modal .modal-content {
+                max-width: 1000px;
                 max-height: 90vh;
                 padding: 0;
                 overflow-y: auto;
+                width: 95%;
             }
             
             .product-details-container {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 40px;
+                gap: 30px;
                 padding: 30px;
             }
             
@@ -424,34 +776,30 @@ class CatalogManager {
             
             .main-image-container {
                 position: relative;
-                border-radius: var(--radius);
+                border-radius: 12px;
                 overflow: hidden;
                 height: 350px;
                 margin-bottom: 15px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+                background: #f5f5f5;
+                border: 1px solid #e0e0e0;
             }
             
-            .main-image-container img {
+            .main-product-image {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: transform 0.5s ease;
-            }
-            
-            .main-image-container img:hover {
-                transform: scale(1.02);
             }
             
             .image-counter {
                 position: absolute;
-                top: 15px;
+                bottom: 15px;
                 right: 15px;
                 background: rgba(0, 0, 0, 0.7);
                 color: white;
-                padding: 5px 12px;
+                padding: 6px 12px;
                 border-radius: 20px;
                 font-size: 0.9rem;
-                font-weight: 600;
+                border: 1px solid white;
             }
             
             .image-nav {
@@ -467,25 +815,28 @@ class CatalogManager {
             }
             
             .image-nav-btn {
-                width: 45px;
-                height: 45px;
-                background: rgba(255, 255, 255, 0.95);
-                border: none;
+                width: 44px;
+                height: 44px;
+                background: rgba(255, 255, 255, 0.9);
+                border: 2px solid #333;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
                 transition: all 0.3s ease;
-                color: var(--primary-dark);
+                color: #333;
                 font-size: 1.2rem;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             }
             
             .image-nav-btn:hover:not(:disabled) {
                 background: white;
-                transform: scale(1.15);
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+                transform: scale(1.1);
+            }
+            
+            .image-nav-btn:focus-visible {
+                outline: 3px solid #0066CC;
+                outline-offset: 2px;
             }
             
             .image-nav-btn:disabled {
@@ -499,20 +850,21 @@ class CatalogManager {
                 margin-top: 15px;
                 padding: 10px;
                 overflow-x: auto;
-                border-radius: 10px;
-                background: var(--light-bg);
+                background: #f5f5f5;
+                border-radius: 8px;
             }
             
             .image-thumbnail {
                 width: 80px;
                 height: 60px;
-                border-radius: 8px;
+                border-radius: 6px;
                 overflow: hidden;
                 cursor: pointer;
                 border: 3px solid transparent;
                 transition: all 0.3s ease;
                 flex-shrink: 0;
-                position: relative;
+                padding: 0;
+                background: none;
             }
             
             .image-thumbnail img {
@@ -521,38 +873,23 @@ class CatalogManager {
                 object-fit: cover;
             }
             
-            .image-thumbnail:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            }
-            
             .image-thumbnail.active {
-                border-color: var(--accent-teal);
-                box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+                border-color: #E67E22;
             }
             
-            .image-thumbnail .thumbnail-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(255, 140, 0, 0.1);
-                display: none;
+            .image-thumbnail:focus-visible {
+                outline: 3px solid #0066CC;
+                outline-offset: 2px;
             }
             
-            .image-thumbnail.active .thumbnail-overlay {
-                display: block;
-            }
-            
-            .product-details-content {
+            .product-details-info {
                 padding: 10px 0;
             }
             
             .product-price-large {
                 font-size: 2.2rem;
                 font-weight: 800;
-                color: var(--accent-teal);
+                color: #E67E22;
                 margin: 20px 0;
                 display: flex;
                 align-items: center;
@@ -563,63 +900,14 @@ class CatalogManager {
             .product-description h3,
             .product-features-section h3,
             .product-specifications h3 {
-                color: var(--primary-dark);
+                color: #333;
                 margin: 25px 0 15px 0;
                 font-size: 1.3rem;
             }
             
-            .product-features-section {
-                margin: 25px 0;
-            }
-            
-            .section-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-            }
-            
-            .features-nav {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }
-            
-            .features-nav-btn {
-                width: 35px;
-                height: 35px;
-                background: var(--light-bg);
-                border: none;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                color: var(--dark-text);
-            }
-            
-            .features-nav-btn:hover:not(:disabled) {
-                background: var(--accent-teal);
-                color: white;
-                transform: scale(1.1);
-            }
-            
-            .features-nav-btn:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-            
-            .features-page-info {
-                font-size: 0.9rem;
-                color: var(--gray-text);
-                min-width: 120px;
-                text-align: center;
-            }
-            
             .features-container {
-                background: var(--light-bg);
-                border-radius: 10px;
+                background: #f5f5f5;
+                border-radius: 8px;
                 padding: 20px;
                 min-height: 200px;
                 max-height: 300px;
@@ -633,170 +921,109 @@ class CatalogManager {
             }
             
             .features-container li {
-                padding: 12px 0;
-                color: var(--dark-text);
+                padding: 10px 0;
+                color: #333;
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-            }
-            
-            .features-container li:hover {
-                background: rgba(255, 140, 0, 0.05);
-                padding-left: 10px;
-                border-bottom-color: var(--accent-teal);
-            }
-            
-            .features-container li i {
-                color: var(--accent-teal);
-                width: 20px;
-                font-size: 0.9rem;
+                border-bottom: 1px solid #ddd;
             }
             
             .features-container li:last-child {
                 border-bottom: none;
             }
             
+            .features-container li i {
+                color: #E67E22;
+                width: 20px;
+            }
+            
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            
+            .features-nav {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .features-nav-btn {
+                width: 36px;
+                height: 36px;
+                background: #f5f5f5;
+                border: 2px solid #ddd;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .features-nav-btn:hover:not(:disabled) {
+                background: #E67E22;
+                color: white;
+                border-color: #E67E22;
+            }
+            
+            .features-nav-btn:focus-visible {
+                outline: 3px solid #0066CC;
+                outline-offset: 2px;
+            }
+            
+            .features-nav-btn:disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+            }
+            
+            .features-page-info {
+                font-size: 0.9rem;
+                color: #666;
+                min-width: 120px;
+                text-align: center;
+            }
+            
             .specs-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
                 gap: 15px;
-                margin-bottom: 20px;
+                margin-top: 15px;
             }
             
             .spec-item {
-                background: var(--light-bg);
-                padding: 15px;
-                border-radius: 10px;
+                background: #f5f5f5;
+                padding: 12px 15px;
+                border-radius: 8px;
                 display: flex;
                 flex-direction: column;
-                transition: all 0.3s ease;
-            }
-            
-            .spec-item:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-                background: white;
             }
             
             .spec-key {
                 font-weight: 600;
-                color: var(--dark-text);
-                margin-bottom: 5px;
+                color: #333;
                 font-size: 0.9rem;
+                margin-bottom: 5px;
             }
             
             .spec-value {
-                color: var(--gray-text);
-                font-size: 0.9rem;
+                color: #666;
+                font-size: 1rem;
             }
             
             .product-actions-large {
                 display: flex;
                 gap: 15px;
                 margin-top: 30px;
-                flex-wrap: wrap;
             }
             
             .product-actions-large .btn-primary,
             .product-actions-large .btn-secondary {
                 flex: 1;
-                min-width: 200px;
-            }
-            
-            .product-actions-large .btn-secondary {
-                background: rgba(255, 255, 255, 0.1);
-                color: var(--primary-dark);
-                border: 2px solid var(--accent-teal);
-            }
-            
-            .product-actions-large .btn-secondary:hover {
-                background: var(--accent-teal);
-                color: white;
-            }
-            
-            /* Анимация смены изображений */
-            @keyframes fadeIn {
-                from { opacity: 0; transform: scale(0.95); }
-                to { opacity: 1; transform: scale(1); }
-            }
-            
-            @keyframes slideInLeft {
-                from { opacity: 0; transform: translateX(-30px); }
-                to { opacity: 1; transform: translateX(0); }
-            }
-            
-            @keyframes slideInRight {
-                from { opacity: 0; transform: translateX(30px); }
-                to { opacity: 1; transform: translateX(0); }
-            }
-            
-            .image-fade-in {
-                animation: fadeIn 0.4s ease;
-            }
-            
-            .image-slide-left {
-                animation: slideInLeft 0.4s ease;
-            }
-            
-            .image-slide-right {
-                animation: slideInRight 0.4s ease;
-            }
-            
-            /* Полноэкранный режим */
-            .fullscreen-mode {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.95);
-                z-index: 3000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .fullscreen-image-container {
-                max-width: 90vw;
-                max-height: 90vh;
-                position: relative;
-            }
-            
-            .fullscreen-image-container img {
-                max-width: 100%;
-                max-height: 90vh;
-                object-fit: contain;
-            }
-            
-            .fullscreen-controls {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                display: flex;
-                gap: 10px;
-            }
-            
-            .fullscreen-controls button {
-                background: rgba(255, 255, 255, 0.1);
-                border: none;
-                color: white;
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                font-size: 1.3rem;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                backdrop-filter: blur(10px);
-            }
-            
-            .fullscreen-controls button:hover {
-                background: rgba(255, 255, 255, 0.2);
-                transform: scale(1.1);
+                padding: 16px 24px;
             }
             
             @media (max-width: 768px) {
@@ -810,26 +1037,12 @@ class CatalogManager {
                     height: 250px;
                 }
                 
-                .image-thumbnails {
-                    justify-content: center;
-                }
-                
-                .image-thumbnail {
-                    width: 70px;
-                    height: 50px;
-                }
-                
                 .product-actions-large {
                     flex-direction: column;
                 }
                 
-                .product-actions-large .btn-primary,
-                .product-actions-large .btn-secondary {
-                    min-width: 100%;
-                }
-                
                 .section-header {
-                    flex-direction: column;
+                                    flex-direction: column;
                     align-items: flex-start;
                     gap: 10px;
                 }
@@ -838,25 +1051,34 @@ class CatalogManager {
                     width: 100%;
                     justify-content: center;
                 }
-                
-                .specs-grid {
-                    grid-template-columns: 1fr;
-                }
             }
             
-            /* Анимация смены страниц характеристик */
-            .features-page-enter {
-                animation: slideInRight 0.3s ease;
+            /* Анимации */
+            @keyframes slideInRight {
+                from { opacity: 0; transform: translateX(30px); }
+                to { opacity: 1; transform: translateX(0); }
             }
             
-            .features-page-exit {
-                animation: slideOutLeft 0.3s ease;
+            @keyframes slideInLeft {
+                from { opacity: 0; transform: translateX(-30px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            
+            .image-slide-right {
+                animation: slideInRight 0.4s ease;
+            }
+            
+            .image-slide-left {
+                animation: slideInLeft 0.4s ease;
             }
         `;
         
         document.head.appendChild(style);
     }
     
+    /**
+     * Обновление отображения характеристик
+     */
     updateFeaturesDisplay() {
         if (!this.currentProductDetails) return;
         
@@ -869,86 +1091,41 @@ class CatalogManager {
         const endIndex = startIndex + this.featuresPerPage;
         const pageFeatures = features.slice(startIndex, endIndex);
         
-        // Добавляем анимацию
-        featuresContainer.classList.add('features-page-exit');
-        
-        setTimeout(() => {
-            featuresContainer.innerHTML = `
-                <ul>
-                    ${pageFeatures.map(feature => `
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>${feature}</span>
-                        </li>
-                    `).join('')}
-                </ul>
-                ${features.length === 0 ? '<p style="text-align: center; color: var(--gray-text); padding: 40px;">Характеристики отсутствуют</p>' : ''}
-            `;
-            
-            featuresContainer.classList.remove('features-page-exit');
-            featuresContainer.classList.add('features-page-enter');
-            
-            setTimeout(() => {
-                featuresContainer.classList.remove('features-page-enter');
-            }, 300);
-        }, 300);
+        // Обновляем содержимое
+        featuresContainer.innerHTML = `
+            <ul>
+                ${pageFeatures.map(feature => `
+                    <li>
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>${feature}</span>
+                    </li>
+                `).join('')}
+            </ul>
+            ${features.length === 0 ? `
+                <p style="text-align: center; color: #666; padding: 40px;">
+                    Характеристики отсутствуют
+                </p>
+            ` : ''}
+        `;
         
         // Обновляем информацию о страницах
         const currentPageEl = document.getElementById('currentPage');
         const totalPagesEl = document.getElementById('totalPages');
         
         if (currentPageEl) currentPageEl.textContent = this.currentFeaturePage + 1;
-        if (totalPagesEl) totalPagesEl.textContent = totalPages;
+        if (totalPagesEl) totalPagesEl.textContent = totalPages || 1;
         
         // Обновляем кнопки навигации
-        this.updateNavigationButtons();
+        this.updateFeaturesNavigationButtons();
+        
+        // Объявляем скринридеру
+        this.announceToScreenReader(`Страница характеристик ${this.currentFeaturePage + 1} из ${totalPages || 1}`);
     }
     
-    updateSpecifications() {
-        if (!this.currentProductDetails || !this.currentProductDetails.specifications) return;
-        
-        const specsGrid = document.getElementById('specsGrid');
-        if (!specsGrid) return;
-        
-        const specs = this.currentProductDetails.specifications;
-        
-        specsGrid.innerHTML = Object.entries(specs).map(([key, value]) => `
-            <div class="spec-item">
-                <span class="spec-key">${this.formatSpecKey(key)}</span>
-                <span class="spec-value">${value}</span>
-            </div>
-        `).join('');
-    }
-    
-    formatSpecKey(key) {
-        const translations = {
-            'area': 'Площадь',
-            'length': 'Длина',
-            'width': 'Ширина',
-            'height': 'Высота',
-            'weight': 'Вес',
-            'warranty': 'Гарантия',
-            'rooms': 'Количество комнат',
-            'windows': 'Окна',
-            'doors': 'Двери',
-            'insulation': 'Утепление',
-            'heating': 'Отопление',
-            'ac': 'Кондиционер',
-            'terrace': 'Терраса',
-            'gates': 'Ворота',
-            'material': 'Материал',
-            'color': 'Цвет',
-            'delivery': 'Доставка',
-            'assembly': 'Сборка',
-            'price': 'Цена',
-            'discount': 'Скидка',
-            'stock': 'Наличие'
-        };
-        
-        return translations[key] || key.charAt(0).toUpperCase() + key.slice(1);
-    }
-    
-    updateNavigationButtons() {
+    /**
+     * Обновление кнопок навигации по характеристикам
+     */
+    updateFeaturesNavigationButtons() {
         if (!this.currentProductDetails) return;
         
         const features = this.currentProductDetails.features || [];
@@ -966,7 +1143,9 @@ class CatalogManager {
         }
     }
     
-    // Методы для навигации по характеристикам
+    /**
+     * Следующая страница характеристик
+     */
     nextFeaturesPage() {
         if (!this.currentProductDetails) return;
         
@@ -979,6 +1158,9 @@ class CatalogManager {
         }
     }
     
+    /**
+     * Предыдущая страница характеристик
+     */
     prevFeaturesPage() {
         if (this.currentFeaturePage > 0) {
             this.currentFeaturePage--;
@@ -986,45 +1168,61 @@ class CatalogManager {
         }
     }
     
-    // Методы для управления изображениями
+    /**
+     * Обновление миниатюр изображений
+     */
     updateImageThumbnails() {
-        if (!this.currentProductDetails) return;
-        
         const thumbnailsContainer = document.getElementById('imageThumbnails');
-        if (!thumbnailsContainer) return;
+        if (!thumbnailsContainer || !this.images) return;
         
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image || 'https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'];
-        
-        thumbnailsContainer.innerHTML = images.map((img, index) => `
-            <div class="image-thumbnail ${index === this.currentImageIndex ? 'active' : ''}" 
-                 onclick="catalog.changeImage(${index})"
-                 data-index="${index}">
+        thumbnailsContainer.innerHTML = this.images.map((img, index) => `
+            <button class="image-thumbnail ${index === this.currentImageIndex ? 'active' : ''}" 
+                    onclick="catalog.changeImage(${index})"
+                    data-index="${index}"
+                    role="listitem"
+                    aria-label="Переключить на изображение ${index + 1}"
+                    aria-pressed="${index === this.currentImageIndex ? 'true' : 'false'}">
                 <img src="${img}" 
-                     alt="Миниатюра ${index + 1}"
-                     onerror="this.src='https://via.placeholder.com/100x75/FF8C00/FFFFFF?text=Изображение'">
-                <div class="thumbnail-overlay"></div>
-            </div>
+                     alt="Миниатюра ${index + 1}" 
+                     onerror="this.src='https://via.placeholder.com/100x75/FFFFFF/333333?text=Миниатюра'">
+            </button>
         `).join('');
     }
     
+    /**
+     * Обновление счетчика изображений
+     */
     updateImageCounter() {
-        if (!this.currentProductDetails) return;
-        
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image];
-        const totalImages = images.length || 1;
-        
         const currentIndexEl = document.getElementById('currentImageIndex');
         const totalImagesEl = document.getElementById('totalImages');
         
         if (currentIndexEl) currentIndexEl.textContent = this.currentImageIndex + 1;
-        if (totalImagesEl) totalImagesEl.textContent = totalImages;
+        if (totalImagesEl) totalImagesEl.textContent = this.images.length;
     }
     
-    changeImage(index) {
-        if (!this.currentProductDetails) return;
+    /**
+     * Обновление кнопок навигации по изображениям
+     */
+    updateImageNavigationButtons() {
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
         
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image || 'https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'];
-        if (index < 0 || index >= images.length) return;
+        if (prevBtn) {
+            prevBtn.disabled = this.images.length <= 1;
+        }
+        
+        if (nextBtn) {
+            nextBtn.disabled = this.images.length <= 1;
+        }
+    }
+    
+    /**
+     * Смена изображения
+     */
+    changeImage(index) {
+        if (!this.currentProductDetails || !this.images) return;
+        
+        if (index < 0 || index >= this.images.length) return;
         
         const oldIndex = this.currentImageIndex;
         this.currentImageIndex = index;
@@ -1036,12 +1234,12 @@ class CatalogManager {
         const animationClass = index > oldIndex ? 'image-slide-right' : 'image-slide-left';
         
         // Добавляем анимацию
-                mainImage.classList.add(animationClass);
+        mainImage.classList.add(animationClass);
         
         // Меняем изображение
         setTimeout(() => {
-            mainImage.src = images[index];
-            mainImage.alt = `${this.currentProductDetails.title} - фото ${index + 1}`;
+            mainImage.src = this.images[index];
+            mainImage.alt = `${this.currentProductDetails.title} - изображение ${index + 1} из ${this.images.length}`;
             
             // Обновляем миниатюры
             this.updateImageThumbnails();
@@ -1057,67 +1255,129 @@ class CatalogManager {
                 mainImage.classList.remove(animationClass);
             }, 400);
         }, 200);
+        
+        // Объявляем скринридеру
+        this.announceToScreenReader(`Изображение ${index + 1} из ${this.images.length}`);
     }
     
+    /**
+     * Следующее изображение
+     */
     nextImage() {
-        if (!this.currentProductDetails) return;
+        if (!this.images) return;
         
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image || 'https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'];
-        const nextIndex = (this.currentImageIndex + 1) % images.length;
+        const nextIndex = (this.currentImageIndex + 1) % this.images.length;
         this.changeImage(nextIndex);
     }
     
+    /**
+     * Предыдущее изображение
+     */
     prevImage() {
-        if (!this.currentProductDetails) return;
+        if (!this.images) return;
         
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image || 'https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'];
-        const prevIndex = this.currentImageIndex === 0 ? images.length - 1 : this.currentImageIndex - 1;
+        const prevIndex = this.currentImageIndex === 0 ? this.images.length - 1 : this.currentImageIndex - 1;
         this.changeImage(prevIndex);
     }
     
-    updateImageNavigationButtons() {
-        if (!this.currentProductDetails) return;
+    /**
+     * Инициализация клавиатурных событий для модального окна
+     */
+    initModalKeyboardEvents(modal) {
+        const handleKeyDown = (e) => {
+            if (!this.currentProductDetails) return;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    this.prevImage();
+                    break;
+                    
+                case 'ArrowRight':
+                    e.preventDefault();
+                    this.nextImage();
+                    break;
+                    
+                case 'Escape':
+                    this.closeProductModal();
+                    break;
+                    
+                case 'f':
+                case 'F':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.openFullscreenView();
+                    }
+                    break;
+                    
+                case 'Home':
+                    e.preventDefault();
+                    this.changeImage(0);
+                    break;
+                    
+                case 'End':
+                    e.preventDefault();
+                    this.changeImage(this.images.length - 1);
+                    break;
+            }
+        };
         
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image];
-        const prevBtn = document.querySelector('.prev-btn');
-        const nextBtn = document.querySelector('.next-btn');
+        document.addEventListener('keydown', handleKeyDown);
         
-        if (prevBtn) {
-            prevBtn.disabled = images.length <= 1;
-        }
-        
-        if (nextBtn) {
-            nextBtn.disabled = images.length <= 1;
-        }
+        // Сохраняем обработчик для удаления
+        this.keyboardHandler = handleKeyDown;
     }
     
-    // Метод для полноэкранного просмотра
+    /**
+     * Открытие полноэкранного просмотра
+     */
     openFullscreenView() {
-        if (!this.currentProductDetails) return;
+        if (!this.currentProductDetails || !this.images) return;
         
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image || 'https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'];
-        const currentImage = images[this.currentImageIndex];
+        const currentImage = this.images[this.currentImageIndex];
         
         const fullscreenContainer = document.createElement('div');
         fullscreenContainer.className = 'fullscreen-mode';
+        fullscreenContainer.setAttribute('role', 'dialog');
+        fullscreenContainer.setAttribute('aria-modal', 'true');
+        fullscreenContainer.setAttribute('aria-label', 'Полноэкранный просмотр изображений');
+        
         fullscreenContainer.innerHTML = `
             <div class="fullscreen-image-container">
                 <img src="${currentImage}" 
-                     alt="${this.currentProductDetails.title} - фото ${this.currentImageIndex + 1}"
-                     id="fullscreenImage">
-                <div class="fullscreen-controls">
-                    <button onclick="catalog.prevImageFullscreen()" title="Предыдущее фото">
-                        <i class="fas fa-chevron-left"></i>
+                     alt="${this.currentProductDetails.title} - изображение ${this.currentImageIndex + 1} из ${this.images.length}"
+                     id="fullscreenImage"
+                     class="fullscreen-image">
+                
+                <div class="fullscreen-controls" role="group" aria-label="Управление полноэкранным режимом">
+                    <button class="fullscreen-btn" 
+                            onclick="catalog.prevImageFullscreen()" 
+                            aria-label="Предыдущее изображение"
+                            ${this.images.length <= 1 ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
                     </button>
-                    <button onclick="catalog.nextImageFullscreen()" title="Следующее фото">
-                        <i class="fas fa-chevron-right"></i>
+                    
+                    <button class="fullscreen-btn" 
+                            onclick="catalog.nextImageFullscreen()" 
+                            aria-label="Следующее изображение"
+                            ${this.images.length <= 1 ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
                     </button>
-                    <button onclick="catalog.closeFullscreen()" title="Закрыть">
-                        <i class="fas fa-times"></i>
+                    
+                    <button class="fullscreen-btn" 
+                            onclick="catalog.closeFullscreen()" 
+                            aria-label="Закрыть полноэкранный режим">
+                        <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
-                <div class="fullscreen-counter" style="position: absolute; bottom: 20px; left: 20px; color: white; font-size: 1.1rem; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 20px;">
-                    ${this.currentImageIndex + 1} / ${images.length}
+                
+                <div class="fullscreen-counter" aria-live="polite">
+                    ${this.currentImageIndex + 1} / ${this.images.length}
+                    <span class="sr-only">изображение</span>
+                </div>
+                
+                <div class="fullscreen-instructions" aria-hidden="true">
+                    Используйте стрелки для навигации, ESC для выхода
                 </div>
             </div>
         `;
@@ -1126,107 +1386,138 @@ class CatalogManager {
         
         // Блокируем прокрутку страницы
         document.body.style.overflow = 'hidden';
+        
+        // Устанавливаем фокус на контейнер
+        setTimeout(() => {
+            fullscreenContainer.focus();
+        }, 100);
+        
+        // Добавляем обработчик клавиатуры для полноэкранного режима
+        this.initFullscreenKeyboardEvents(fullscreenContainer);
+        
+        // Объявляем скринридеру
+        this.announceToScreenReader(`Полноэкранный режим. Изображение ${this.currentImageIndex + 1} из ${this.images.length}. Используйте стрелки для навигации.`);
     }
     
+    /**
+     * Инициализация клавиатурных событий для полноэкранного режима
+     */
+    initFullscreenKeyboardEvents(container) {
+        const handleKeyDown = (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    this.prevImageFullscreen();
+                    break;
+                    
+                case 'ArrowRight':
+                    e.preventDefault();
+                    this.nextImageFullscreen();
+                    break;
+                    
+                case 'Escape':
+                    this.closeFullscreen();
+                    break;
+                    
+                case 'Home':
+                    e.preventDefault();
+                    this.changeImage(0);
+                    this.updateFullscreenImage();
+                    break;
+                    
+                case 'End':
+                    e.preventDefault();
+                    this.changeImage(this.images.length - 1);
+                    this.updateFullscreenImage();
+                    break;
+            }
+        };
+        
+        container.addEventListener('keydown', handleKeyDown);
+        
+        // Сохраняем обработчик для удаления
+        this.fullscreenHandler = handleKeyDown;
+    }
+    
+    /**
+     * Следующее изображение в полноэкранном режиме
+     */
     nextImageFullscreen() {
         this.nextImage();
         this.updateFullscreenImage();
     }
     
+    /**
+     * Предыдущее изображение в полноэкранном режиме
+     */
     prevImageFullscreen() {
         this.prevImage();
         this.updateFullscreenImage();
     }
     
+    /**
+     * Обновление изображения в полноэкранном режиме
+     */
     updateFullscreenImage() {
-        if (!this.currentProductDetails) return;
-        
-        const images = this.currentProductDetails.images || [this.currentProductDetails.image || 'https://via.placeholder.com/500x350/FF8C00/FFFFFF?text=Изображение+товара'];
         const fullscreenImage = document.getElementById('fullscreenImage');
-        const fullscreenContainer = document.querySelector('.fullscreen-counter');
+        const fullscreenCounter = document.querySelector('.fullscreen-counter');
         
         if (fullscreenImage) {
-            fullscreenImage.src = images[this.currentImageIndex];
-            fullscreenImage.alt = `${this.currentProductDetails.title} - фото ${this.currentImageIndex + 1}`;
+            fullscreenImage.src = this.images[this.currentImageIndex];
+            fullscreenImage.alt = `${this.currentProductDetails.title} - изображение ${this.currentImageIndex + 1} из ${this.images.length}`;
         }
         
-        if (fullscreenContainer) {
-            fullscreenContainer.innerHTML = `${this.currentImageIndex + 1} / ${images.length}`;
+        if (fullscreenCounter) {
+            fullscreenCounter.innerHTML = `
+                ${this.currentImageIndex + 1} / ${this.images.length}
+                <span class="sr-only">изображение</span>
+            `;
+        }
+        
+        // Обновляем состояние кнопок
+        const prevBtn = document.querySelector('.fullscreen-btn[onclick*="prevImageFullscreen"]');
+        const nextBtn = document.querySelector('.fullscreen-btn[onclick*="nextImageFullscreen"]');
+        
+        if (prevBtn) {
+            prevBtn.disabled = this.images.length <= 1;
+        }
+        
+        if (nextBtn) {
+            nextBtn.disabled = this.images.length <= 1;
         }
     }
     
+    /**
+     * Закрытие полноэкранного режима
+     */
     closeFullscreen() {
         const fullscreenContainer = document.querySelector('.fullscreen-mode');
         if (fullscreenContainer) {
             fullscreenContainer.remove();
         }
         
-        // Восстанавливаем прокрутку страницы
+        // Восстанавливаем прокрутку
         document.body.style.overflow = '';
-    }
-    
-    // Обновляем initModalKeyboardEvents для поддержки навигации по изображениям
-    initModalKeyboardEvents() {
-        const handleKeyDown = (e) => {
-            if (!this.currentProductDetails) return;
-            
-            const isFullscreen = document.querySelector('.fullscreen-mode');
-            
-            switch(e.key) {
-                case 'ArrowLeft':
-                    if (isFullscreen) {
-                        this.prevImageFullscreen();
-                    } else {
-                        this.prevImage();
-                    }
-                    break;
-                case 'ArrowRight':
-                    if (isFullscreen) {
-                        this.nextImageFullscreen();
-                    } else {
-                        this.nextImage();
-                    }
-                    break;
-                case 'Escape':
-                    if (isFullscreen) {
-                        this.closeFullscreen();
-                    } else {
-                        this.closeProductModal();
-                    }
-                    break;
-                case ' ':
-                case 'Spacebar':
-                    e.preventDefault();
-                    if (!isFullscreen) {
-                        this.openFullscreenView();
-                    }
-                    break;
-                case 'f':
-                case 'F':
-                    if (!isFullscreen) {
-                        this.openFullscreenView();
-                    }
-                    break;
-            }
-        };
         
-        document.addEventListener('keydown', handleKeyDown);
-        
-        // Удаляем обработчик при закрытии модального окна
+        // Возвращаем фокус на модальное окно
         const modal = document.querySelector('.modal.active');
         if (modal) {
-            const closeHandler = () => {
-                document.removeEventListener('keydown', handleKeyDown);
-                modal.removeEventListener('click', closeHandler);
-            };
-            modal.addEventListener('click', closeHandler);
+            const closeBtn = modal.querySelector('.modal-close');
+            if (closeBtn) closeBtn.focus();
         }
+        
+        // Объявляем скринридеру
+        this.announceToScreenReader('Полноэкранный режим закрыт');
     }
     
+    /**
+     * Закрытие модального окна с деталями товара
+     */
     closeProductModal() {
         const modal = document.querySelector('.modal.active');
         if (modal) {
             modal.classList.remove('active');
+            
             setTimeout(() => {
                 if (modal.parentNode) {
                     modal.remove();
@@ -1234,14 +1525,262 @@ class CatalogManager {
             }, 300);
         }
         
-        // Восстанавливаем обработчик для полноэкранного режима
+        // Удаляем обработчик клавиатуры
+        if (this.keyboardHandler) {
+            document.removeEventListener('keydown', this.keyboardHandler);
+        }
+        
+        // Восстанавливаем прокрутку
         document.body.style.overflow = '';
         
+        // Возвращаем фокус на карточку товара
+        if (this.currentProductDetails) {
+            const productCard = document.querySelector(`.product-card[data-id="${this.currentProductDetails.id}"]`);
+            if (productCard) {
+                productCard.focus();
+            }
+        }
+        
+        // Очищаем данные
         this.currentProductDetails = null;
         this.currentFeaturePage = 0;
         this.currentImageIndex = 0;
+        this.images = [];
+        
+        // Объявляем скринридеру
+        this.announceToScreenReader('Окно деталей товара закрыто');
+    }
+    
+    /**
+     * Поиск по каталогу (публичный метод)
+     */
+    search(query) {
+        this.searchProducts(query);
+    }
+    
+    /**
+     * Получение текущей категории (публичный метод)
+     */
+    getCurrentCategory() {
+        return this.currentCategory;
+    }
+    
+    /**
+     * Получение количества товаров (публичный метод)
+     */
+    getProductsCount() {
+        return this.filteredProducts.length;
+    }
+    
+    /**
+     * Обновление каталога (публичный метод)
+     */
+    refresh() {
+        this.loadProducts(this.currentCategory);
+        this.announceToScreenReader('Каталог обновлен');
+    }
+    
+    /**
+     * Добавление стилей для полноэкранного режима
+     */
+    addFullscreenStyles() {
+        if (document.getElementById('fullscreen-styles')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'fullscreen-styles';
+        style.textContent = `
+            .fullscreen-mode {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.95);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                outline: none;
+            }
+            
+            .fullscreen-image-container {
+                max-width: 90vw;
+                max-height: 90vh;
+                position: relative;
+            }
+            
+            .fullscreen-image {
+                max-width: 100%;
+                max-height: 90vh;
+                object-fit: contain;
+                border: 2px solid white;
+                border-radius: 8px;
+            }
+            
+            .fullscreen-controls {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                display: flex;
+                gap: 10px;
+            }
+            
+            .fullscreen-btn {
+                width: 50px;
+                height: 50px;
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                border-radius: 50%;
+                font-size: 1.2rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .fullscreen-btn:hover:not(:disabled) {
+                background: rgba(255, 255, 255, 0.4);
+                transform: scale(1.1);
+            }
+            
+            .fullscreen-btn:focus-visible {
+                outline: 3px solid #0066CC;
+                outline-offset: 2px;
+            }
+            
+            .fullscreen-btn:disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+            }
+            
+            .fullscreen-counter {
+                position: absolute;
+                bottom: 20px;
+                left: 20px;
+                color: white;
+                font-size: 1.1rem;
+                background: rgba(0, 0, 0, 0.6);
+                padding: 8px 16px;
+                border-radius: 20px;
+                border: 1px solid white;
+            }
+            
+            .fullscreen-instructions {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                color: rgba(255, 255, 255, 0.5);
+                font-size: 0.9rem;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 6px 12px;
+                border-radius: 20px;
+            }
+            
+            @media (max-width: 768px) {
+                .fullscreen-controls {
+                    top: 10px;
+                    right: 10px;
+                }
+                
+                .fullscreen-btn {
+                    width: 44px;
+                    height: 44px;
+                }
+                
+                .fullscreen-counter {
+                    bottom: 10px;
+                    left: 10px;
+                    font-size: 0.9rem;
+                }
+                
+                .fullscreen-instructions {
+                    display: none;
+                }
+            }
+        `;
+        
+        document.head.appendChild(style);
     }
 }
 
-// Инициализация глобального экземпляра
-window.catalog = new CatalogManager();
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+
+// Создаем глобальный экземпляр каталога
+document.addEventListener('DOMContentLoaded', () => {
+    window.catalog = new CatalogManager();
+});
+
+// Добавляем стили при загрузке
+(function addStyles() {
+    if (document.getElementById('catalog-base-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'catalog-base-styles';
+    style.textContent = `
+        /* Стили для индикатора загрузки */
+        .loading-spinner {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .loading-spinner i {
+            color: #E67E22;
+            margin-bottom: 20px;
+        }
+        
+        /* Стили для пустого каталога */
+        .empty-catalog {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .empty-catalog i {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        /* Стили для ошибки */
+        .error-message {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .error-message i {
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        
+        /* Стили для скринридеров */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* Фокус для доступности */
+        .product-card:focus-visible,
+        .tab-btn:focus-visible,
+        .btn-small:focus-visible,
+        .image-thumbnail:focus-visible {
+            outline: 3px solid #0066CC;
+            outline-offset: 2px;
+        }
+    `;
+    
+    document.head.appendChild(style);
+})();
+
+// Экспорт для модульных систем
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { CatalogManager };
+}
+
+console.log('📦 catalog.js загружен, версия 2.0 (ГОСТ-совместимая)');

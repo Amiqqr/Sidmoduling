@@ -39,6 +39,7 @@ function sendToTelegram($data, $settings) {
 📧 <b>Email:</b> {$data['email']}
 🏠 <b>Интересует:</b> {$data['product']}
 📝 <b>Комментарий:</b> {$data['message']}
+✅ <b>Согласие на обработку:</b> {$data['consent']}
 
 ⏰ <b>Время заявки:</b> {$data['date']}
 🌐 <b>Источник:</b> {$data['source']}
@@ -136,6 +137,7 @@ switch ($method) {
                 'email' => $input['email'] ?? '',
                 'product' => $input['product'] ?? '',
                 'message' => $input['message'] ?? '',
+                'consent' => $input['consent'] ?? 'Нет',
                 'date' => date('Y-m-d H:i:s'),
                 'status' => 'new',
                 'source' => $input['source'] ?? 'website'
@@ -158,7 +160,7 @@ switch ($method) {
         break;
         
     default:
-        http_response_code(405);
+                http_response_code(405);
         echo json_encode(['error' => 'Method not allowed']);
 }
 ?>
