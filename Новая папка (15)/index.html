@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ООО СибМодулинг | Бытовки и модульные дома премиум-класса</title>
+    <meta name="description" content="Производство модульных домов и бытовок в Новосибирске. Собственное производство, гарантия 12 месяцев, доставка по России.">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" as="style">
+    <link rel="preload" href="css/style.css" as="style">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css" media="(max-width: 992px)">
+</head>
+<body>
+    <!-- Skip to main content link - REQUIRED FOR GOST -->
+    <a href="#main-content" class="skip-link">Перейти к основному содержанию</a>
+
+    <!-- Header with ARIA improvements -->
+    <header id="header" class="header" role="banner">
+        <div class="container nav-container">
+            <!-- Logo with proper alt text -->
+            <a href="#home" class="logo" aria-label="ООО СибМодулинг - на главную">
+                <img src="images/logo.png" alt="Логотип компании ООО СибМодулинг" class="logo-img" width="50" height="50">
+            </a>
+
+            <!-- Mobile menu button with proper ARIA -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn" 
+                    aria-label="Открыть меню навигации" 
+                    aria-expanded="false" 
+                    aria-controls="navMenu">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+                <span class="sr-only">Меню</span>
+            </button>
+
+            <!-- Navigation with ARIA -->
+            <nav role="navigation" aria-label="Основное меню">
+                <ul class="nav-menu" id="navMenu" role="list">
+                    <li role="listitem"><a href="#home" class="nav-link active" aria-current="page">Главная</a></li>
+                    <li role="listitem"><a href="#catalog" class="nav-link">Каталог</a></li>
+                    <li role="listitem"><a href="#features" class="nav-link">Преимущества</a></li>
+                    <li role="listitem"><a href="#about" class="nav-link">О нас</a></li>
+                    <li role="listitem"><a href="#contact" class="nav-link">Контакты</a></li>
+                </ul>
+            </nav>
+
+            <!-- CTA Button -->
+            <a href="#consultation" class="nav-cta" id="headerCta" aria-label="Заказать бесплатную консультацию">
+                <i class="fas fa-phone-alt" aria-hidden="true"></i>
+                <span>Консультация</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main content with landmark -->
+    <main id="main-content" role="main">
+        <!-- Hero Section with improved contrast -->
+        <section class="hero" id="home" aria-labelledby="hero-heading">
+            <div class="container hero-content">
+                <h1 id="hero-heading">Премиальные модульные дома и бытовки от    ООО СибМодулинг</h1>
+                <p class="hero-subtitle">Создаем пространства будущего уже сегодня. Быстрая установка, инновационные решения и лучшие цены на рынке.</p>
+
+                <div class="hero-stats" role="list" aria-label="Статистика компании">
+                    <div class="stat-item" role="listitem">
+                        <div class="stat-number" data-count="1500+">1500+</div>
+                        <div class="stat-label">Выполненных проектов</div>
+                    </div>
+                    <div class="stat-item" role="listitem">
+                        <div class="stat-number" data-count="12">12</div>
+                        <div class="stat-label">мес гарантии</div>
+                    </div>
+                    <div class="stat-item" role="listitem">
+                        <div class="stat-number" data-count="24">24</div>
+                        <div class="stat-label">Часа на установку</div>
+                    </div>
+                </div>
+
+                <div class="hero-cta">
+                    <a href="#catalog" class="btn-primary" aria-label="Перейти к каталогу товаров">
+                        <i class="fas fa-eye" aria-hidden="true"></i>
+                        <span>Смотреть каталог</span>
+                    </a>
+                    <a href="#consultation" class="btn-secondary" id="heroConsultation" aria-label="Рассчитать стоимость проекта">
+                        <i class="fas fa-calculator" aria-hidden="true"></i>
+                        <span>Рассчитать стоимость</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features" aria-labelledby="features-heading">
+            <div class="container">
+                <div class="section-title animate-on-scroll">
+                    <h2 id="features-heading">Почему выбирают ООО СибМодулинг</h2>
+                    <p>Мы создаем модульные решения, которые превосходят ожидания по качеству и комфорту</p>
+                </div>
+
+                <div class="features-grid" role="list" aria-label="Наши преимущества">
+                    <article class="feature-card animate-on-scroll" role="listitem">
+                        <div class="feature-icon" aria-hidden="true">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>Скорость производства</h3>
+                        <p>Производство за 3-5 дней. Готовое решение под ключ в кратчайшие сроки.</p>
+                    </article>
+
+                    <article class="feature-card animate-on-scroll" role="listitem" style="animation-delay: 0.2s;">
+                        <div class="feature-icon" aria-hidden="true">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Гарантия 12 мес</h3>
+                        <p>Ваша уверенность в качестве.</p>
+                    </article>
+
+                    <article class="feature-card animate-on-scroll" role="listitem" style="animation-delay: 0.4s;">
+                        <div class="feature-icon" aria-hidden="true">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <h3>Лучшая цена</h3>
+                        <p>Стоимость на 15-20% ниже конкурентов благодаря собственному производству.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Catalog Section -->
+        <section class="catalog" id="catalog" aria-labelledby="catalog-heading">
+            <div class="container">
+                <div class="section-title animate-on-scroll">
+                    <h2 id="catalog-heading">Наша продукция</h2>
+                    <p>Широкий выбор модульных конструкций для любых задач</p>
+                </div>
+
+                <!-- Tabs with proper ARIA -->
+                <div class="catalog-tabs" id="catalogTabs" role="tablist" aria-label="Категории товаров">
+                    <button class="tab-btn active" data-category="all" role="tab" aria-selected="true" aria-controls="catalog-panel">Все товары</button>
+                    <button class="tab-btn" data-category="houses" role="tab" aria-selected="false" aria-controls="catalog-panel">Модульные дома</button>
+                    <button class="tab-btn" data-category="offices" role="tab" aria-selected="false" aria-controls="catalog-panel">Офисные модули</button>
+                    <button class="tab-btn" data-category="storage" role="tab" aria-selected="false" aria-controls="catalog-panel">Бытовки</button>
+                    <button class="tab-btn" data-category="promo" role="tab" aria-selected="false" aria-controls="catalog-panel">Акции</button>
+                </div>
+
+                <!-- Catalog grid with proper ARIA -->
+                <div class="catalog-grid" id="catalogGrid" role="region" aria-label="Список товаров" tabindex="-1"></div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about" id="about" aria-labelledby="about-heading">
+            <div class="container">
+                <div class="about-content">
+                    <div class="about-text">
+                        <h2 id="about-heading">О компании ООО СибМодулинг</h2>
+                        <p>ООО СибМодулинг — лидер на рынке модульных конструкций с 2010 года. Мы специализируемся на создании современных, функциональных и стильных модульных решений для жизни и работы.</p>
+                        <p>Наша миссия — сделать качественное модульное жилье доступным для каждого. Мы сочетаем инновационные технологии с проверенными временем материалами, чтобы создавать пространства, которые служат годами.</p>
+                        <p>Собственное производство позволяет нам контролировать каждый этап создания продукта — от проектирования до установки на объекте заказчика.</p>
+                        <a href="#contact" class="btn-primary" style="margin-top: 20px;" aria-label="Связаться с нами">
+                            <i class="fas fa-handshake" aria-hidden="true"></i>
+                            <span>Связаться с нами</span>
+                        </a>
+                    </div>
+                    <div class="about-image">
+                        <img src="images/products/8.png" alt="Производственный цех компании ООО СибМодулинг" loading="lazy" width="600" height="400">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technologies Section -->
+        <section class="technologies" id="technologies" aria-labelledby="tech-heading">
+            <div class="container">
+                <div class="section-title animate-on-scroll">
+                    <h2 id="tech-heading">Наши технологии</h2>
+                    <p>Используем только современные материалы и технологии</p>
+                </div>
+
+                <div class="tech-grid" role="list" aria-label="Технологии строительства">
+                    <article class="tech-card animate-on-scroll" role="listitem">
+                        <div class="tech-icon" aria-hidden="true">
+                            <i class="fas fa-snowflake"></i>
+                        </div>
+                        <h3>Утепление</h3>
+                        <p>Утепление от 100мм минватой Ветро-влага защита Парозизоляция</p>
+                    </article>
+
+                    <article class="tech-card animate-on-scroll" role="listitem" style="animation-delay: 0.2s;">
+                        <div class="tech-icon" aria-hidden="true">
+                            <i class="fas fa-hammer"></i>
+                        </div>
+                        <h3>Металлокаркас</h3>
+                        <p>Уголок + швеллер Прочность и долговечность</p>
+                    </article>
+
+                    <article class="tech-card animate-on-scroll" role="listitem" style="animation-delay: 0.4s;">
+                        <div class="tech-icon" aria-hidden="true">
+                            <i class="fas fa-paint-roller"></i>
+                        </div>
+                        <h3>Отделка</h3>
+                        <p>ОСБ, МДФ, Вагонка и др + финишная отделка на выбор</p>
+                    </article>
+                </div
+                            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="process" id="process" aria-labelledby="process-heading">
+            <div class="container">
+                <div class="section-title animate-on-scroll">
+                    <h2 id="process-heading">Как мы работаем</h2>
+                    <p>Простой и понятный процесс от заявки до установки</p>
+                </div>
+
+                <div class="process-steps" role="list" aria-label="Этапы работы">
+                    <div class="process-step animate-on-scroll" role="listitem">
+                        <div class="step-number" aria-hidden="true">1</div>
+                        <h3>Заявка</h3>
+                        <p>Оставляете заявку на сайте или по телефону</p>
+                    </div>
+
+                    <div class="process-step animate-on-scroll" role="listitem" style="animation-delay: 0.1s;">
+                        <div class="step-number" aria-hidden="true">2</div>
+                        <h3>Консультация</h3>
+                        <p>Наш специалист помогает с выбором и расчетом</p>
+                    </div>
+
+                    <div class="process-step animate-on-scroll" role="listitem" style="animation-delay: 0.2s;">
+                        <div class="step-number" aria-hidden="true">3</div>
+                        <h3>Производство</h3>
+                        <p>Изготавливаем модуль на нашем производстве</p>
+                    </div>
+
+                    <div class="process-step animate-on-scroll" role="listitem" style="animation-delay: 0.3s;">
+                        <div class="step-number" aria-hidden="true">4</div>
+                        <h3>Установка</h3>
+                        <p>Доставляем и устанавливаем на вашем объекте</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section" id="contact" aria-labelledby="contact-heading">
+            <div class="container">
+                <div class="section-title animate-on-scroll">
+                    <h2 id="contact-heading">Контакты</h2>
+                    <p>Свяжитесь с нами любым удобным способом</p>
+                </div>
+
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <h3>Контактная информация</h3>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon" aria-hidden="true">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>Адрес</h4>
+                                <p>г. Новосибирск, Мочищенское шоссе, 1/4к7</p>
+                                <p class="address-note">Производственная база и офис продаж</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon" aria-hidden="true">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>Телефоны</h4>
+                                <p class="phone-main"><a href="tel:+79232261102" aria-label="Позвонить по номеру +7 923 226 11 02">+7 (923) 226-11-02</a></p>
+                                <p class="phone-secondary"><a href="tel:+73831234567" aria-label="Позвонить по номеру +7 383 123 45 67">+7 (383) 123-45-67</a></p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon" aria-hidden="true">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>Email</h4>
+                                <p class="email"><a href="mailto:sibmoduling@gmail.com" aria-label="Отправить email на sibmoduling@gmail.com">sibmoduling@gmail.com</a></p>
+                                <p class="email"><a href="mailto:sales@sibmoduling.ru" aria-label="Отправить email на sales@sibmoduling.ru">sales@sibmoduling.ru</a></p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon" aria-hidden="true">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>Часы работы</h4>
+                                <p class="schedule">Пн-Пт: 9:00-20:00</p>
+                                <p class="schedule">Сб-Вс: 10:00-18:00</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-cta">
+                            <a href="#consultation" class="btn-primary" aria-label="Записаться на просмотр">
+                                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                                <span>Записаться на просмотр</span>
+                            </a>
+                            <a href="tel:+79232261102" class="btn-secondary" aria-label="Позвонить сейчас">
+                                <i class="fas fa-phone" aria-hidden="true"></i>
+                                <span>Позвонить сейчас</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="map-wrapper">
+                        <h3>Мы на карте</h3>
+                        <div class="map-container" id="mapContainer">
+                            <div class="map-loader">
+                                <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                                <p>Загрузка карты...</p>
+                            </div>
+                        </div>
+                        <div class="map-info" aria-label="Информация о парковке">
+                            <p><i class="fas fa-car" aria-hidden="true"></i> Бесплатная парковка для клиентов</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-bottom" role="list" aria-label="Дополнительная информация">
+                    <div class="contact-bottom-item" role="listitem">
+                        <i class="fas fa-truck" aria-hidden="true"></i>
+                        <h4>Доставка</h4>
+                        <p>По всей России</p>
+                    </div>
+                    <div class="contact-bottom-item" role="listitem">
+                        <i class="fas fa-hard-hat" aria-hidden="true"></i>
+                        <h4>Консультация</h4>
+                        <p>Бесплатный замер и Бесплатная консультация</p>
+                    </div>
+                    <div class="contact-bottom-item" role="listitem">
+                        <i class="fas fa-file-contract" aria-hidden="true"></i>
+                        <h4>Работаем по договору</h4>
+                        <p>Все документы и договоры Онлайн или На месте</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Consultation Form (обновленная версия с галочкой) -->
+        <section class="consultation" id="consultation" aria-labelledby="form-heading">
+            <div class="container">
+                <div class="consultation-form animate-on-scroll">
+                    <h2 id="form-heading">Получите бесплатную консультацию</h2>
+                    <p class="form-subtitle">Оставьте заявку и наш специалист свяжется с вами в течение 15 минут</p>
+                    
+                    <form id="consultationForm" novalidate>
+                        <div class="form-group">
+                            <label for="name" class="required">Ваше имя *</label>
+                            <input type="text" id="name" name="name" class="form-control" 
+                                   placeholder="Иван Иванов" 
+                                   required 
+                                   aria-required="true"
+                                   aria-describedby="nameError"
+                                   minlength="2" 
+                                   maxlength="100">
+                            <div class="error-message" id="nameError" role="alert"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone" class="required">Номер телефона *</label>
+                            <input type="tel" id="phone" name="phone" class="form-control" 
+                                   placeholder="+7 (999) 123-45-67" 
+                                   required
+                                   aria-required="true"
+                                   aria-describedby="phoneError">
+                            <div class="error-message" id="phoneError" role="alert"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" 
+                                   placeholder="ivan@example.com"
+                                   aria-describedby="emailError"
+                                   maxlength="100">
+                            <div class="error-message" id="emailError" role="alert"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="product">Что вас интересует?</label>
+                            <select id="product" name="product" class="form-control">
+                                <option value="">Выберите продукт</option>
+                                <option value="house">Модульный дом</option>
+                                <option value="office">Офисный модуль</option>
+                                <option value="bytovka">Бытовка</option>
+                                <option value="other">Другое</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Комментарий</label>
+                            <textarea id="message" name="message" class="form-control" 
+                                      placeholder="Дополнительная информация, пожелания..." 
+                                      rows="4"
+                                      maxlength="500"
+                                      aria-describedby="charCount"></textarea>
+                            <div class="char-counter" id="charCount">
+                                Осталось символов: <span>500</span>
+                            </div>
+                        </div>
+                        
+                        <!-- НОВЫЙ БЛОК: Согласие на обработку данных -->
+                        <div class="form-group form-group-checkbox">
+                            <input type="checkbox" id="consent" name="consent" required aria-required="true" class="form-checkbox">
+                            <label for="consent" class="required checkbox-label">
+                                Я согласен на обработку моих персональных данных *
+                            </label>
+                            <div class="error-message" id="consentError" role="alert"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary submit-btn" aria-label="Отправить заявку">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                            <span>Отправить заявку</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <img src="images/logo.png" alt="ООО СибМодулинг" class="footer-logo-img" width="50" height="50">
+                    </div>
+                    <p class="footer-desc">Лидер на рынке модульных конструкций. Создаем пространства, которые работают на вас.</p>
+                    <div class="social-links" role="list" aria-label="Социальные сети">
+                        <a href="https://t.me/VILLHOUS" class="social-link" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Telegram">
+                            <i class="fab fa-telegram" aria-hidden="true"></i>
+                            <span class="sr-only">Telegram</span>
+                        </a>
+                        <a href="#" class="social-link" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                            <span class="sr-only">WhatsApp</span>
+                        </a>
+                        <a href="#" class="social-link" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="ВКонтакте">
+                            <i class="fab fa-vk" aria-hidden="true"></i>
+                            <span class="sr-only">ВКонтакте</span>
+                        </a>
+                        <a href="https://www.youtube.com/@White026" class="social-link" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="YouTube">
+                            <i class="fab fa-youtube" aria-hidden="true"></i>
+                            <span class="sr-only">YouTube</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Продукция</h3>
+                    <ul class="footer-links" role="list" aria-label="Категории продукции">
+                        <li role="listitem"><a href="#catalog">Модульные дома</a></li>
+                        <li role="listitem"><a href="#catalog">Бытовки строительные</a></li>
+                        <li role="listitem"><a href="#catalog">Офисные модули</a></li>
+                        <li role="listitem"><a href="#catalog">Складские помещения</a></li>
+                        <li role="listitem"><a href="#catalog">Дачные домики</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Компания</h3>
+                    <ul class="footer-links" role="list" aria-label="Информация о компании">
+                        <li role="listitem"><a href="#about">О нас</a></li>
+                        <li role="listitem"><a href="#process">Как мы работаем</a></li>
+                        <li role="listitem"><a href="#technologies">Наши технологии</a></li>
+                        <li role="listitem"><a href="#contact">Контакты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Контакты</h3>
+                    <ul class="footer-contact-info" role="list" aria-label="Контактная информация">
+                        <li role="listitem">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <span>Новосибирск, Мочищенское шоссе, 1/4</span>
+                        </li>
+                        <li role="listitem">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                            <a href="tel:+79232261102" aria-label="Позвонить +7 923 226 11 02">+7 (923) 226-11-02</a>
+                        </li>
+                        <li role="listitem">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <a href="mailto:sibmoduling@gmail.com">sibmoduling@gmail.com</a>
+                        </li>
+                        <li role="listitem">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                            <span>Пн-Пт: 9:00-20:00<br>Сб-Вс: 10:00-18:00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2026 ООО СибМодулинг. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal with ARIA -->
+    <div class="modal" id="successModal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc" hidden>
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal" aria-label="Закрыть окно">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <div class="modal-success">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                <h3 id="modal-title">Заявка отправлена!</h3>
+                <p id="modal-desc">Наш специалист свяжется с вами в течение 30 минут в рабочее время</p>
+                <button class="btn-primary" id="closeSuccess">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/db.js" defer></script>
+    <script src="js/app.js" defer></script>
+    <script src="js/catalog.js" defer></script>
+    <script src="js/form.js" defer></script>
+    <script src="js/animations.js" defer></script>
+    <script src="js/map.js" defer></script>
+</body>
+</html>
