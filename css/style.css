@@ -1656,3 +1656,71 @@ footer {
         margin-top: 3px;
     }
 }
+/* Стили для видео в полноэкранном режиме */
+.fullscreen-video {
+    max-width: 100%;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    border: 2px solid white;
+    border-radius: 8px;
+    background: #000;
+}
+
+/* Стили для миниатюр видео */
+.video-thumbnail {
+    position: relative;
+    background: #333;
+}
+
+.video-thumbnail::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.video-thumbnail .video-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    z-index: 2;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.video-thumbnail.active .video-icon {
+    color: #E67E22;
+}
+
+.video-thumbnail img {
+    opacity: 0.7;
+    filter: brightness(0.7);
+}
+
+/* Стили для основного контейнера видео */
+.main-product-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #1a1a1a;
+    border-radius: 8px;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .fullscreen-video {
+        max-width: 100%;
+        max-height: 80vh;
+    }
+    
+    .video-thumbnail .video-icon {
+        font-size: 18px;
+    }
+}

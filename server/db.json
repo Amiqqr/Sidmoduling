@@ -4,7 +4,7 @@
       "id": 1,
       "category": "houses",
       "title": "Бытовка СТАНДАРТ",
-      "price": "280 600₽",
+      "price": "250 000₽",
       "oldPrice": null,
       "images": [
         "images/products/1.png",
@@ -49,7 +49,7 @@
       "id": 2,
       "category": "offices",
       "title": "Модульный Дом",
-      "price": "597 000₽",
+      "price": "500 000₽",
       "oldPrice": null,
       "images": [
         "images/products/2.png",
@@ -96,8 +96,8 @@
     {
       "id": 3,
       "category": "storage",
-      "title": "ХОЗ/БЛОК",
-      "price": "158 600₽",
+      "title": "ХОЗ БЛОК",
+      "price": "140 000₽",
       "oldPrice": null,
       "images": [
         "images/products/3.png",
@@ -230,7 +230,7 @@
       "id": 6,
       "category": "storage",
       "title": "Модульный Дом",
-      "price": "600 000₽",
+      "price": "550 000₽",
       "oldPrice": "",
       "images": [
         "images/products/6.png",
@@ -281,7 +281,7 @@
       "id": 7,
       "category": "houses",
       "title": "Бытовка в стиле Домик",
-      "price": "340 000₽",
+      "price": "350 000₽",
       "oldPrice": "",
       "images": [
         "images/products/7.png",
@@ -330,9 +330,11 @@
       "oldPrice": "",
       "images": [
         "images/products/8.png",
-        "images/products/8.png",
-        "images/products/8.png"
+        "images/products/8.1.png"
       ],
+      "videos": [
+        "images/video/8.mp4"
+        ],        
       "features": [
         "Площадь дома: 16,8 м²",
         "Площадь террасы: 16,8 м²",
@@ -379,7 +381,7 @@
       "id": 9,
       "category": "offices",
       "title": "Каркасный ДомБарн House",
-      "price": "От 4 000 000 ₽",
+      "price": "От 5 000 000 ₽",
       "oldPrice": null,
       "images": [ 
         "images/products/9.png",

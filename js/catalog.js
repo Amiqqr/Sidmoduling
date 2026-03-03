@@ -13,9 +13,13 @@ class CatalogManager {
         this.currentFeaturePage = 0;
         this.featuresPerPage = 5;
         
-        // Для галереи изображений
+        // Для галереи изображений и видео
         this.currentImageIndex = 0;
         this.images = [];
+        this.mediaItems = []; // Массив для объединения изображений и видео
+        
+        // Таймер для предпросмотра видео
+        this.previewTimeout = null;
         
         // Для accessibility
         this.liveRegion = null;
@@ -235,7 +239,7 @@ class CatalogManager {
     }
     
     /**
-     * Создание карточки товара с поддержкой доступности
+     * Создание карточки товара с поддержкой доступности и предпросмотром видео
      */
     createProductCard(product, index) {
         // Используем article вместо div для семантики
@@ -256,6 +260,10 @@ class CatalogManager {
         // Основное изображение
         const mainImage = product.images?.[0] || product.image || 'https://via.placeholder.com/350x250/FFFFFF/333333?text=Изображение+товара';
         
+        // Проверяем наличие видео
+        const hasVideo = product.videos && product.videos.length > 0;
+        const videoSrc = hasVideo ? product.videos[0] : null;
+        
         // Формирование HTML карточки
         card.innerHTML = `
             ${product.badge ? `
@@ -270,12 +278,15 @@ class CatalogManager {
                 </div>
             ` : ''}
             
-            <div class="product-image-container">
+            <div class="product-image-container" data-has-video="${hasVideo}">
                 <img src="${mainImage}" 
                      alt="${product.title} - основное изображение" 
                      class="product-image" 
+                     id="product-image-${product.id}"
                      loading="lazy"
+                     data-video-src="${videoSrc || ''}"
                      onerror="this.src='https://via.placeholder.com/350x250/FFFFFF/333333?text=Изображение+товара'">
+                ${hasVideo ? `<video class="product-video-preview" src="${videoSrc}" preload="none" loop muted playsinline></video>` : ''}
             </div>
             
             <div class="product-content">
@@ -328,6 +339,38 @@ class CatalogManager {
                 </div>
             </div>
         `;
+        
+        // Добавляем обработчики для предпросмотра видео при наведении
+        if (hasVideo) {
+            const imageContainer = card.querySelector('.product-image-container');
+            const image = card.querySelector('.product-image');
+            const video = card.querySelector('.product-video-preview');
+            
+            if (imageContainer && image && video) {
+                imageContainer.addEventListener('mouseenter', () => {
+                    this.previewTimeout = setTimeout(() => {
+                        // Прячем изображение, показываем видео и начинаем воспроизведение
+                        image.style.opacity = '0';
+                        video.style.opacity = '1';
+                        video.play().catch(e => console.log('Не удалось воспроизвести видео при наведении:', e));
+                    }, 300); // Задержка 300мс перед показом видео
+                });
+                
+                imageContainer.addEventListener('mouseleave', () => {
+                    // Очищаем таймер
+                    if (this.previewTimeout) {
+                        clearTimeout(this.previewTimeout);
+                        this.previewTimeout = null;
+                    }
+                    
+                    // Возвращаем изображение и останавливаем видео
+                    image.style.opacity = '1';
+                    video.style.opacity = '0';
+                    video.pause();
+                    video.currentTime = 0;
+                });
+            }
+        }
         
         return card;
     }
@@ -496,7 +539,7 @@ class CatalogManager {
     }
     
     /**
-     * Показать детали продукта с галереей изображений
+     * Показать детали продукта с галереей изображений и видео
      */
     async showProductDetails(productId) {
         const product = await Database.getProductById(productId);
@@ -510,13 +553,42 @@ class CatalogManager {
         this.currentProductDetails = product;
         this.currentFeaturePage = 0;
         this.currentImageIndex = 0;
-        this.images = product.images || [product.image || 'https://via.placeholder.com/500x350/FFFFFF/333333?text=Изображение+товара'];
+        
+        // Формируем массив медиа (изображения + видео)
+        this.mediaItems = [];
+        
+        // Добавляем изображения
+        if (product.images && product.images.length > 0) {
+            this.mediaItems.push(...product.images.map(src => ({
+                type: 'image',
+                src: src
+            })));
+        }
+        
+        // Добавляем видео, если есть
+        if (product.videos && product.videos.length > 0) {
+            this.mediaItems.push(...product.videos.map(src => ({
+                type: 'video',
+                src: src
+            })));
+        }
+        
+        // Если нет ни изображений, ни видео, добавляем заглушку
+        if (this.mediaItems.length === 0) {
+            this.mediaItems.push({
+                type: 'image',
+                src: 'https://via.placeholder.com/500x350/FFFFFF/333333?text=Изображение+товара'
+            });
+        }
         
         // Создание модального окна
         this.createProductModal(product);
         
+        // Добавляем стили для видео
+        this.addVideoStyles();
+        
         // Объявляем скринридеру
-        this.announceToScreenReader(`Открыты детали товара: ${product.title}. Используйте стрелки для навигации по изображениям.`);
+        this.announceToScreenReader(`Открыты детали товара: ${product.title}. Используйте стрелки для навигации по медиа.`);
     }
     
     /**
@@ -538,6 +610,9 @@ class CatalogManager {
         
         const totalPages = Math.ceil((product.features?.length || 0) / this.featuresPerPage);
         
+        // Определяем, есть ли видео в медиа
+        const hasVideo = this.mediaItems.some(item => item.type === 'video');
+        
         modal.innerHTML = `
             <div class="modal-content product-details-content">
                 <button class="modal-close" onclick="catalog.closeProductModal()" 
@@ -547,47 +622,44 @@ class CatalogManager {
                 
                 <div class="product-details-container">
                     <div class="product-details-image">
-                        <div class="main-image-container">
-                            <img src="${this.images[0]}" 
-                                 alt="${product.title} - изображение 1 из ${this.images.length}" 
-                                 id="mainProductImage"
-                                 class="main-product-image"
-                                 onerror="this.src='https://via.placeholder.com/500x350/FFFFFF/333333?text=Изображение+товара'">
+                        <div class="main-image-container" id="mainMediaContainer">
+                            ${this.renderCurrentMedia(0)}
                             
                             <div class="image-counter" aria-live="polite">
-                                <span id="currentImageIndex">1</span> / <span id="totalImages">${this.images.length}</span>
-                                <span class="sr-only">изображение</span>
+                                <span id="currentImageIndex">1</span> / <span id="totalImages">${this.mediaItems.length}</span>
+                                <span class="sr-only">${hasVideo ? 'медиа' : 'изображение'}</span>
                             </div>
                         </div>
                         
-                        <div class="image-nav" role="group" aria-label="Навигация по изображениям">
+                        <div class="image-nav" role="group" aria-label="Навигация по медиа">
                             <button class="image-nav-btn prev-btn" 
                                     onclick="catalog.prevImage()" 
-                                    ${this.images.length <= 1 ? 'disabled' : ''}
-                                    aria-label="Предыдущее изображение">
+                                    ${this.mediaItems.length <= 1 ? 'disabled' : ''}
+                                    aria-label="Предыдущее">
                                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
                             </button>
                             
                             <button class="image-nav-btn next-btn" 
                                     onclick="catalog.nextImage()" 
-                                    ${this.images.length <= 1 ? 'disabled' : ''}
-                                    aria-label="Следующее изображение">
+                                    ${this.mediaItems.length <= 1 ? 'disabled' : ''}
+                                    aria-label="Следующее">
                                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
                             </button>
                         </div>
                         
-                        <!-- Миниатюры изображений -->
-                        <div class="image-thumbnails" id="imageThumbnails" role="list" aria-label="Миниатюры изображений">
-                            ${this.images.map((img, index) => `
+                        <!-- Миниатюры -->
+                        <div class="image-thumbnails" id="imageThumbnails" role="list" aria-label="Миниатюры">
+                            ${this.mediaItems.map((item, index) => `
                                 <button class="image-thumbnail ${index === 0 ? 'active' : ''}" 
                                         onclick="catalog.changeImage(${index})"
                                         data-index="${index}"
                                         role="listitem"
-                                        aria-label="Переключить на изображение ${index + 1}"
+                                        aria-label="${item.type === 'video' ? 'Видео' : 'Изображение'} ${index + 1}"
                                         aria-pressed="${index === 0 ? 'true' : 'false'}">
-                                    <img src="${img}" 
-                                         alt="Миниатюра ${index + 1}" 
-                                         onerror="this.src='https://via.placeholder.com/100x75/FFFFFF/333333?text=Миниатюра'">
+                                    ${item.type === 'video' 
+                                        ? '<i class="fas fa-play" aria-hidden="true" style="color: #E67E22; font-size: 20px;"></i>' 
+                                        : `<img src="${item.src}" alt="Миниатюра ${index + 1}" onerror="this.src='https://via.placeholder.com/100x75/FFFFFF/333333?text=Ошибка'">`
+                                    }
                                 </button>
                             `).join('')}
                         </div>
@@ -674,7 +746,7 @@ class CatalogManager {
                             
                             <button class="btn-secondary" 
                                     onclick="catalog.openFullscreenView()"
-                                    aria-label="Открыть полноэкранный просмотр изображений">
+                                    aria-label="Открыть полноэкранный просмотр">
                                 <i class="fas fa-expand-arrows-alt" aria-hidden="true"></i>
                                 <span>Полноэкранный просмотр</span>
                             </button>
@@ -692,6 +764,9 @@ class CatalogManager {
         // Загружаем характеристики
         this.updateFeaturesDisplay();
         
+        // Инициализируем видео, если текущий элемент - видео
+        this.initCurrentVideo();
+        
         // Инициализируем обработчики клавиатуры
         this.initModalKeyboardEvents(modal);
         
@@ -707,6 +782,88 @@ class CatalogManager {
                 this.closeProductModal();
             }
         });
+    }
+    
+    /**
+     * Рендеринг текущего медиа (изображение или видео)
+     */
+    renderCurrentMedia(index) {
+        if (!this.mediaItems || this.mediaItems.length === 0) return '';
+        
+        const item = this.mediaItems[index];
+        
+        if (item.type === 'video') {
+            return `
+                <video controls 
+                       class="main-product-video" 
+                       id="mainProductVideo"
+                       poster="${this.mediaItems.find(m => m.type === 'image')?.src || ''}"
+                       preload="metadata">
+                    <source src="${item.src}" type="video/mp4">
+                    Ваш браузер не поддерживает видео.
+                </video>
+            `;
+        } else {
+            return `
+                <img src="${item.src}" 
+                     alt="Изображение ${index + 1} из ${this.mediaItems.length}" 
+                     id="mainProductImage"
+                     class="main-product-image"
+                     onerror="this.src='https://via.placeholder.com/500x350/FFFFFF/333333?text=Изображение+товара'">
+            `;
+        }
+    }
+    
+    /**
+     * Добавление стилей для видео и предпросмотра
+     */
+    addVideoStyles() {
+        if (document.getElementById('video-styles')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'video-styles';
+        style.textContent = `
+            .main-product-video {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                background: #000;
+            }
+            
+            .product-image-container {
+                position: relative;
+                height: 250px;
+                overflow: hidden;
+            }
+            
+            .product-image,
+            .product-video-preview {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: opacity 0.3s ease;
+            }
+            
+            .product-video-preview {
+                opacity: 0;
+                pointer-events: none;
+            }
+            
+            .fullscreen-video {
+                max-width: 100%;
+                max-height: 90vh;
+                width: auto;
+                height: auto;
+                border: 2px solid white;
+                border-radius: 8px;
+                background: #000;
+            }
+        `;
+        
+        document.head.appendChild(style);
     }
     
     /**
@@ -732,7 +889,9 @@ class CatalogManager {
             'rooms': 'Комнат',
             'bathroom': 'Санузел',
             'ac': 'Кондиционер',
-            'furniture': 'Мебель'
+            'furniture': 'Мебель',
+            'terrace_area': 'Площадь террасы',
+            'total_area': 'Общая площадь'
         };
         
         return Object.entries(specs).map(([key, value]) => {
@@ -826,7 +985,7 @@ class CatalogManager {
                 cursor: pointer;
                 transition: all 0.3s ease;
                 color: #333;
-                font-size: 1.2rem;
+                                font-size: 1.2rem;
             }
             
             .image-nav-btn:hover:not(:disabled) {
@@ -865,12 +1024,20 @@ class CatalogManager {
                 flex-shrink: 0;
                 padding: 0;
                 background: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             
             .image-thumbnail img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
+            }
+            
+            .image-thumbnail i {
+                font-size: 24px;
+                color: #E67E22;
             }
             
             .image-thumbnail.active {
@@ -943,6 +1110,8 @@ class CatalogManager {
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 15px;
+                flex-wrap: wrap;
+                gap: 15px;
             }
             
             .features-nav {
@@ -1042,7 +1211,7 @@ class CatalogManager {
                 }
                 
                 .section-header {
-                                    flex-direction: column;
+                    flex-direction: column;
                     align-items: flex-start;
                     gap: 10px;
                 }
@@ -1169,114 +1338,144 @@ class CatalogManager {
     }
     
     /**
-     * Обновление миниатюр изображений
+     * Инициализация текущего видео
      */
-    updateImageThumbnails() {
-        const thumbnailsContainer = document.getElementById('imageThumbnails');
-        if (!thumbnailsContainer || !this.images) return;
-        
-        thumbnailsContainer.innerHTML = this.images.map((img, index) => `
-            <button class="image-thumbnail ${index === this.currentImageIndex ? 'active' : ''}" 
-                    onclick="catalog.changeImage(${index})"
-                    data-index="${index}"
-                    role="listitem"
-                    aria-label="Переключить на изображение ${index + 1}"
-                    aria-pressed="${index === this.currentImageIndex ? 'true' : 'false'}">
-                <img src="${img}" 
-                     alt="Миниатюра ${index + 1}" 
-                     onerror="this.src='https://via.placeholder.com/100x75/FFFFFF/333333?text=Миниатюра'">
-            </button>
-        `).join('');
-    }
-    
-    /**
-     * Обновление счетчика изображений
-     */
-    updateImageCounter() {
-        const currentIndexEl = document.getElementById('currentImageIndex');
-        const totalImagesEl = document.getElementById('totalImages');
-        
-        if (currentIndexEl) currentIndexEl.textContent = this.currentImageIndex + 1;
-        if (totalImagesEl) totalImagesEl.textContent = this.images.length;
-    }
-    
-    /**
-     * Обновление кнопок навигации по изображениям
-     */
-    updateImageNavigationButtons() {
-        const prevBtn = document.querySelector('.prev-btn');
-        const nextBtn = document.querySelector('.next-btn');
-        
-        if (prevBtn) {
-            prevBtn.disabled = this.images.length <= 1;
-        }
-        
-        if (nextBtn) {
-            nextBtn.disabled = this.images.length <= 1;
+    initCurrentVideo() {
+        const video = document.getElementById('mainProductVideo');
+        if (video) {
+            // Добавляем обработчики для видео
+            video.addEventListener('play', () => {
+                this.announceToScreenReader('Видео воспроизводится');
+            });
+            
+            video.addEventListener('pause', () => {
+                this.announceToScreenReader('Видео на паузе');
+            });
+            
+            video.addEventListener('ended', () => {
+                this.announceToScreenReader('Видео завершено');
+            });
+            
+            video.addEventListener('error', (e) => {
+                console.error('Ошибка воспроизведения видео:', e);
+                this.announceToScreenReader('Ошибка загрузки видео');
+            });
         }
     }
     
     /**
-     * Смена изображения
+     * Смена медиа (изображение или видео)
      */
     changeImage(index) {
-        if (!this.currentProductDetails || !this.images) return;
+        if (!this.currentProductDetails || !this.mediaItems) return;
         
-        if (index < 0 || index >= this.images.length) return;
+        if (index < 0 || index >= this.mediaItems.length) return;
         
         const oldIndex = this.currentImageIndex;
         this.currentImageIndex = index;
         
-        const mainImage = document.getElementById('mainProductImage');
-        if (!mainImage) return;
+        const mainContainer = document.getElementById('mainMediaContainer');
+        if (!mainContainer) return;
         
         // Определяем направление анимации
         const animationClass = index > oldIndex ? 'image-slide-right' : 'image-slide-left';
         
         // Добавляем анимацию
-        mainImage.classList.add(animationClass);
+        mainContainer.classList.add(animationClass);
         
-        // Меняем изображение
+        // Меняем медиа
         setTimeout(() => {
-            mainImage.src = this.images[index];
-            mainImage.alt = `${this.currentProductDetails.title} - изображение ${index + 1} из ${this.images.length}`;
+            mainContainer.innerHTML = this.renderCurrentMedia(index);
             
             // Обновляем миниатюры
-            this.updateImageThumbnails();
+            this.updateMediaThumbnails();
             
             // Обновляем счетчик
-            this.updateImageCounter();
+            this.updateMediaCounter();
             
             // Обновляем кнопки навигации
-            this.updateImageNavigationButtons();
+            this.updateMediaNavigationButtons();
+            
+            // Инициализируем видео, если нужно
+            this.initCurrentVideo();
             
             // Убираем анимацию
             setTimeout(() => {
-                mainImage.classList.remove(animationClass);
+                mainContainer.classList.remove(animationClass);
             }, 400);
         }, 200);
         
         // Объявляем скринридеру
-        this.announceToScreenReader(`Изображение ${index + 1} из ${this.images.length}`);
+        const mediaType = this.mediaItems[index].type === 'video' ? 'видео' : 'изображение';
+        this.announceToScreenReader(`${mediaType} ${index + 1} из ${this.mediaItems.length}`);
     }
     
     /**
-     * Следующее изображение
+     * Обновление миниатюр медиа
+     */
+    updateMediaThumbnails() {
+        const thumbnailsContainer = document.getElementById('imageThumbnails');
+        if (!thumbnailsContainer || !this.mediaItems) return;
+        
+        thumbnailsContainer.innerHTML = this.mediaItems.map((item, index) => `
+            <button class="image-thumbnail ${index === this.currentImageIndex ? 'active' : ''}" 
+                    onclick="catalog.changeImage(${index})"
+                    data-index="${index}"
+                    role="listitem"
+                    aria-label="${item.type === 'video' ? 'Видео' : 'Изображение'} ${index + 1}"
+                    aria-pressed="${index === this.currentImageIndex ? 'true' : 'false'}">
+                ${item.type === 'video' 
+                    ? '<i class="fas fa-play" aria-hidden="true" style="color: #E67E22; font-size: 20px;"></i>' 
+                    : `<img src="${item.src}" alt="Миниатюра ${index + 1}" onerror="this.src='https://via.placeholder.com/100x75/FFFFFF/333333?text=Ошибка'">`
+                }
+            </button>
+        `).join('');
+    }
+    
+    /**
+     * Обновление счетчика медиа
+     */
+    updateMediaCounter() {
+        const currentIndexEl = document.getElementById('currentImageIndex');
+        const totalImagesEl = document.getElementById('totalImages');
+        
+        if (currentIndexEl) currentIndexEl.textContent = this.currentImageIndex + 1;
+        if (totalImagesEl) totalImagesEl.textContent = this.mediaItems.length;
+    }
+    
+    /**
+     * Обновление кнопок навигации по медиа
+     */
+    updateMediaNavigationButtons() {
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        
+        if (prevBtn) {
+            prevBtn.disabled = this.mediaItems.length <= 1;
+        }
+        
+        if (nextBtn) {
+            nextBtn.disabled = this.mediaItems.length <= 1;
+        }
+    }
+    
+    /**
+     * Следующее медиа
      */
     nextImage() {
-        if (!this.images) return;
+        if (!this.mediaItems) return;
         
-        const nextIndex = (this.currentImageIndex + 1) % this.images.length;
+        const nextIndex = (this.currentImageIndex + 1) % this.mediaItems.length;
         this.changeImage(nextIndex);
     }
     
     /**
-     * Предыдущее изображение
+     * Предыдущее медиа
      */
     prevImage() {
-        if (!this.images) return;
+        if (!this.mediaItems) return;
         
-        const prevIndex = this.currentImageIndex === 0 ? this.images.length - 1 : this.currentImageIndex - 1;
+        const prevIndex = this.currentImageIndex === 0 ? this.mediaItems.length - 1 : this.currentImageIndex - 1;
         this.changeImage(prevIndex);
     }
     
@@ -1317,7 +1516,7 @@ class CatalogManager {
                     
                 case 'End':
                     e.preventDefault();
-                    this.changeImage(this.images.length - 1);
+                    this.changeImage(this.mediaItems.length - 1);
                     break;
             }
         };
@@ -1332,35 +1531,44 @@ class CatalogManager {
      * Открытие полноэкранного просмотра
      */
     openFullscreenView() {
-        if (!this.currentProductDetails || !this.images) return;
+        if (!this.currentProductDetails || !this.mediaItems) return;
         
-        const currentImage = this.images[this.currentImageIndex];
+        const currentItem = this.mediaItems[this.currentImageIndex];
         
         const fullscreenContainer = document.createElement('div');
         fullscreenContainer.className = 'fullscreen-mode';
         fullscreenContainer.setAttribute('role', 'dialog');
         fullscreenContainer.setAttribute('aria-modal', 'true');
-        fullscreenContainer.setAttribute('aria-label', 'Полноэкранный просмотр изображений');
+        fullscreenContainer.setAttribute('aria-label', 'Полноэкранный просмотр');
         
         fullscreenContainer.innerHTML = `
             <div class="fullscreen-image-container">
-                <img src="${currentImage}" 
-                     alt="${this.currentProductDetails.title} - изображение ${this.currentImageIndex + 1} из ${this.images.length}"
-                     id="fullscreenImage"
-                     class="fullscreen-image">
+                ${currentItem.type === 'video' 
+                    ? `<video controls 
+                            src="${currentItem.src}"
+                            class="fullscreen-video"
+                            autoplay
+                            preload="metadata">
+                            Ваш браузер не поддерживает видео.
+                       </video>`
+                    : `<img src="${currentItem.src}" 
+                            alt="${this.currentProductDetails.title} - изображение ${this.currentImageIndex + 1} из ${this.mediaItems.length}"
+                            id="fullscreenImage"
+                            class="fullscreen-image">`
+                }
                 
                 <div class="fullscreen-controls" role="group" aria-label="Управление полноэкранным режимом">
                     <button class="fullscreen-btn" 
                             onclick="catalog.prevImageFullscreen()" 
-                            aria-label="Предыдущее изображение"
-                            ${this.images.length <= 1 ? 'disabled' : ''}>
+                            aria-label="Предыдущее"
+                            ${this.mediaItems.length <= 1 ? 'disabled' : ''}>
                         <i class="fas fa-chevron-left" aria-hidden="true"></i>
                     </button>
                     
                     <button class="fullscreen-btn" 
                             onclick="catalog.nextImageFullscreen()" 
-                            aria-label="Следующее изображение"
-                            ${this.images.length <= 1 ? 'disabled' : ''}>
+                            aria-label="Следующее"
+                            ${this.mediaItems.length <= 1 ? 'disabled' : ''}>
                         <i class="fas fa-chevron-right" aria-hidden="true"></i>
                     </button>
                     
@@ -1372,8 +1580,8 @@ class CatalogManager {
                 </div>
                 
                 <div class="fullscreen-counter" aria-live="polite">
-                    ${this.currentImageIndex + 1} / ${this.images.length}
-                    <span class="sr-only">изображение</span>
+                    ${this.currentImageIndex + 1} / ${this.mediaItems.length}
+                    <span class="sr-only">${currentItem.type === 'video' ? 'видео' : 'изображение'}</span>
                 </div>
                 
                 <div class="fullscreen-instructions" aria-hidden="true">
@@ -1396,7 +1604,8 @@ class CatalogManager {
         this.initFullscreenKeyboardEvents(fullscreenContainer);
         
         // Объявляем скринридеру
-        this.announceToScreenReader(`Полноэкранный режим. Изображение ${this.currentImageIndex + 1} из ${this.images.length}. Используйте стрелки для навигации.`);
+        const mediaType = this.mediaItems[this.currentImageIndex].type === 'video' ? 'видео' : 'изображение';
+        this.announceToScreenReader(`Полноэкранный режим. ${mediaType} ${this.currentImageIndex + 1} из ${this.mediaItems.length}. Используйте стрелки для навигации.`);
     }
     
     /**
@@ -1422,13 +1631,13 @@ class CatalogManager {
                 case 'Home':
                     e.preventDefault();
                     this.changeImage(0);
-                    this.updateFullscreenImage();
+                    this.updateFullscreenMedia();
                     break;
                     
                 case 'End':
                     e.preventDefault();
-                    this.changeImage(this.images.length - 1);
-                    this.updateFullscreenImage();
+                    this.changeImage(this.mediaItems.length - 1);
+                    this.updateFullscreenMedia();
                     break;
             }
         };
@@ -1440,51 +1649,72 @@ class CatalogManager {
     }
     
     /**
-     * Следующее изображение в полноэкранном режиме
+     * Следующее медиа в полноэкранном режиме
      */
     nextImageFullscreen() {
         this.nextImage();
-        this.updateFullscreenImage();
+        this.updateFullscreenMedia();
     }
     
     /**
-     * Предыдущее изображение в полноэкранном режиме
+     * Предыдущее медиа в полноэкранном режиме
      */
     prevImageFullscreen() {
         this.prevImage();
-        this.updateFullscreenImage();
+        this.updateFullscreenMedia();
     }
     
     /**
-     * Обновление изображения в полноэкранном режиме
+     * Обновление медиа в полноэкранном режиме
      */
-    updateFullscreenImage() {
-        const fullscreenImage = document.getElementById('fullscreenImage');
-        const fullscreenCounter = document.querySelector('.fullscreen-counter');
+    updateFullscreenMedia() {
+        const currentItem = this.mediaItems[this.currentImageIndex];
+        const fullscreenContainer = document.querySelector('.fullscreen-image-container');
         
-        if (fullscreenImage) {
-            fullscreenImage.src = this.images[this.currentImageIndex];
-            fullscreenImage.alt = `${this.currentProductDetails.title} - изображение ${this.currentImageIndex + 1} из ${this.images.length}`;
+        if (!fullscreenContainer) return;
+        
+        // Обновляем контент
+        const mediaElement = currentItem.type === 'video' 
+            ? `<video controls 
+                    src="${currentItem.src}"
+                    class="fullscreen-video"
+                    autoplay
+                    preload="metadata">
+                    Ваш браузер не поддерживает видео.
+               </video>`
+            : `<img src="${currentItem.src}" 
+                    alt="${this.currentProductDetails.title} - изображение ${this.currentImageIndex + 1} из ${this.mediaItems.length}"
+                    class="fullscreen-image">`;
+        
+        // Обновляем только медиа, сохраняя контролы
+        const oldMedia = fullscreenContainer.querySelector('.fullscreen-video, .fullscreen-image');
+        if (oldMedia) {
+            oldMedia.outerHTML = mediaElement;
         }
         
-        if (fullscreenCounter) {
-            fullscreenCounter.innerHTML = `
-                ${this.currentImageIndex + 1} / ${this.images.length}
-                <span class="sr-only">изображение</span>
+        // Обновляем счетчик
+        const counter = fullscreenContainer.querySelector('.fullscreen-counter');
+        if (counter) {
+            counter.innerHTML = `
+                ${this.currentImageIndex + 1} / ${this.mediaItems.length}
+                <span class="sr-only">${currentItem.type === 'video' ? 'видео' : 'изображение'}</span>
             `;
         }
         
         // Обновляем состояние кнопок
-        const prevBtn = document.querySelector('.fullscreen-btn[onclick*="prevImageFullscreen"]');
-        const nextBtn = document.querySelector('.fullscreen-btn[onclick*="nextImageFullscreen"]');
+        const prevBtn = fullscreenContainer.querySelector('.fullscreen-btn[onclick*="prevImageFullscreen"]');
+        const nextBtn = fullscreenContainer.querySelector('.fullscreen-btn[onclick*="nextImageFullscreen"]');
         
         if (prevBtn) {
-            prevBtn.disabled = this.images.length <= 1;
+            prevBtn.disabled = this.mediaItems.length <= 1;
         }
         
         if (nextBtn) {
-            nextBtn.disabled = this.images.length <= 1;
+            nextBtn.disabled = this.mediaItems.length <= 1;
         }
+        
+        // Объявляем скринридеру
+        this.announceToScreenReader(`${currentItem.type === 'video' ? 'Видео' : 'Изображение'} ${this.currentImageIndex + 1} из ${this.mediaItems.length}`);
     }
     
     /**
@@ -1546,6 +1776,7 @@ class CatalogManager {
         this.currentFeaturePage = 0;
         this.currentImageIndex = 0;
         this.images = [];
+        this.mediaItems = [];
         
         // Объявляем скринридеру
         this.announceToScreenReader('Окно деталей товара закрыто');
@@ -1578,130 +1809,6 @@ class CatalogManager {
     refresh() {
         this.loadProducts(this.currentCategory);
         this.announceToScreenReader('Каталог обновлен');
-    }
-    
-    /**
-     * Добавление стилей для полноэкранного режима
-     */
-    addFullscreenStyles() {
-        if (document.getElementById('fullscreen-styles')) return;
-        
-        const style = document.createElement('style');
-        style.id = 'fullscreen-styles';
-        style.textContent = `
-            .fullscreen-mode {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.95);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                outline: none;
-            }
-            
-            .fullscreen-image-container {
-                max-width: 90vw;
-                max-height: 90vh;
-                position: relative;
-            }
-            
-            .fullscreen-image {
-                max-width: 100%;
-                max-height: 90vh;
-                object-fit: contain;
-                border: 2px solid white;
-                border-radius: 8px;
-            }
-            
-            .fullscreen-controls {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                display: flex;
-                gap: 10px;
-            }
-            
-            .fullscreen-btn {
-                width: 50px;
-                height: 50px;
-                background: rgba(255, 255, 255, 0.2);
-                border: 2px solid white;
-                color: white;
-                border-radius: 50%;
-                font-size: 1.2rem;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .fullscreen-btn:hover:not(:disabled) {
-                background: rgba(255, 255, 255, 0.4);
-                transform: scale(1.1);
-            }
-            
-            .fullscreen-btn:focus-visible {
-                outline: 3px solid #0066CC;
-                outline-offset: 2px;
-            }
-            
-            .fullscreen-btn:disabled {
-                opacity: 0.3;
-                cursor: not-allowed;
-            }
-            
-            .fullscreen-counter {
-                position: absolute;
-                bottom: 20px;
-                left: 20px;
-                color: white;
-                font-size: 1.1rem;
-                background: rgba(0, 0, 0, 0.6);
-                padding: 8px 16px;
-                border-radius: 20px;
-                border: 1px solid white;
-            }
-            
-            .fullscreen-instructions {
-                position: absolute;
-                bottom: 20px;
-                right: 20px;
-                color: rgba(255, 255, 255, 0.5);
-                font-size: 0.9rem;
-                background: rgba(0, 0, 0, 0.3);
-                padding: 6px 12px;
-                border-radius: 20px;
-            }
-            
-            @media (max-width: 768px) {
-                .fullscreen-controls {
-                    top: 10px;
-                    right: 10px;
-                }
-                
-                .fullscreen-btn {
-                    width: 44px;
-                    height: 44px;
-                }
-                
-                .fullscreen-counter {
-                    bottom: 10px;
-                    left: 10px;
-                    font-size: 0.9rem;
-                }
-                
-                .fullscreen-instructions {
-                    display: none;
-                }
-            }
-        `;
-        
-        document.head.appendChild(style);
     }
 }
 
@@ -1778,9 +1885,141 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(style);
 })();
 
+// Добавляем стили для полноэкранного режима
+(function addFullscreenStyles() {
+    if (document.getElementById('fullscreen-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'fullscreen-styles';
+    style.textContent = `
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+        
+        .fullscreen-image-container {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+        }
+        
+        .fullscreen-image {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border: 2px solid white;
+            border-radius: 8px;
+        }
+        
+        .fullscreen-video {
+            max-width: 100%;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            border: 2px solid white;
+            border-radius: 8px;
+            background: #000;
+        }
+        
+        .fullscreen-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .fullscreen-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fullscreen-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .fullscreen-btn:focus-visible {
+            outline: 3px solid #0066CC;
+            outline-offset: 2px;
+        }
+        
+        .fullscreen-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .fullscreen-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid white;
+        }
+        
+        .fullscreen-instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .fullscreen-controls {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .fullscreen-btn {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .fullscreen-counter {
+                bottom: 10px;
+                left: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .fullscreen-instructions {
+                display: none;
+            }
+        }
+    `;
+    
+    document.head.appendChild(style);
+})();
+
 // Экспорт для модульных систем
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { CatalogManager };
 }
 
-console.log('📦 catalog.js загружен, версия 2.0 (ГОСТ-совместимая)');
+console.log('📦 catalog.js загружен, версия 3.0 (с поддержкой видео)');
