@@ -155,7 +155,7 @@ class FormManager {
             email: form.querySelector('#email').value.trim() || 'не указан',
             product: form.querySelector('#product').value || 'не указано',
             message: form.querySelector('#message').value.trim() || 'нет комментария',
-            consent: consentCheckbox ? 'Да' : 'Нет' // Добавляем статус согласия
+            consent: consentCheckbox && consentCheckbox.checked ? 'Да' : 'Нет'
         };
     }
 
@@ -292,15 +292,18 @@ class FormManager {
             this.value = value.substring(0, 18);
         });
 
-        // Добавление анимации для ошибок
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes errorFlash {
-                0%, 100% { border-color: rgba(255, 255, 255, 0.2); }
-                50% { border-color: #ff6b6b; }
-            }
-        `;
-        document.head.appendChild(style);
+        // Добавление анимации для ошибок (если еще не добавлена)
+        if (!document.getElementById('form-error-flash-style')) {
+            const style = document.createElement('style');
+            style.id = 'form-error-flash-style';
+            style.textContent = `
+                @keyframes errorFlash {
+                    0%, 100% { border-color: rgba(255, 255, 255, 0.2); }
+                    50% { border-color: #ff6b6b; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 
     initCharacterCounter() {

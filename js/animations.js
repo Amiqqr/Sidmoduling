@@ -174,7 +174,7 @@ class AnimationManager {
         const buttons = card.querySelectorAll('.btn-small');
         buttons.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                this.animateButtonClick(e.target);
+                this.animateButtonClick(btn);
             });
         });
     }

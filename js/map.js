@@ -183,65 +183,68 @@ class MapManager {
         `;
         
         // Стили для модального окна с картой
-        const style = document.createElement('style');
-        style.textContent = `
-            .map-modal {
-                max-width: 90%;
-                max-height: 90vh;
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-            }
-            
-            .map-modal h3 {
-                color: var(--primary-dark);
-                margin-bottom: 20px;
-                text-align: center;
-            }
-            
-            .fullscreen-map {
-                flex: 1;
-                min-height: 400px;
-                border-radius: var(--radius);
-                overflow: hidden;
-                margin-bottom: 20px;
-            }
-            
-            .map-instructions {
-                background: var(--light-bg);
-                padding: 20px;
-                border-radius: var(--radius);
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
-            }
-            
-            .map-instructions p {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                color: var(--gray-text);
-                margin: 0;
-            }
-            
-            .map-instructions i {
-                color: var(--accent-teal);
-                width: 20px;
-            }
-            
-            @media (max-width: 768px) {
+        if (!document.getElementById('map-modal-styles')) {
+            const style = document.createElement('style');
+            style.id = 'map-modal-styles';
+            style.textContent = `
                 .map-modal {
-                    max-width: 95%;
-                    padding: 15px;
+                    max-width: 90%;
+                    max-height: 90vh;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .map-modal h3 {
+                    color: var(--primary-dark);
+                    margin-bottom: 20px;
+                    text-align: center;
+                }
+                
+                .fullscreen-map {
+                    flex: 1;
+                    min-height: 400px;
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                    margin-bottom: 20px;
                 }
                 
                 .map-instructions {
-                    grid-template-columns: 1fr;
+                    background: var(--light-bg);
+                    padding: 20px;
+                    border-radius: var(--radius);
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
                 }
-            }
-        `;
-        
-        document.head.appendChild(style);
+                
+                .map-instructions p {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: var(--gray-text);
+                    margin: 0;
+                }
+                
+                .map-instructions i {
+                    color: var(--accent-teal);
+                    width: 20px;
+                }
+                
+                @media (max-width: 768px) {
+                    .map-modal {
+                        max-width: 95%;
+                        padding: 15px;
+                    }
+                    
+                    .map-instructions {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            `;
+            
+            document.head.appendChild(style);
+        }
         document.body.appendChild(modal);
         
         // Закрытие при клике на фон
@@ -251,12 +254,14 @@ class MapManager {
             }
         });
         
-        // Закрытие по Escape
-        document.addEventListener('keydown', (e) => {
+        // Закрытие по Escape (однократный обработчик для этого окна)
+        const onKeyDown = (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
+                document.removeEventListener('keydown', onKeyDown);
             }
-        });
+        };
+        document.addEventListener('keydown', onKeyDown);
     }
     
     // Метод для обновления местоположения (если нужно менять адрес)
@@ -327,55 +332,58 @@ class MapManager {
         `;
         
         // Стили для модального окна маршрута
-        const style = document.createElement('style');
-        style.textContent = `
-            .route-modal {
-                max-width: 90%;
-                max-height: 90vh;
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-            }
+        if (!document.getElementById('route-modal-styles')) {
+            const style = document.createElement('style');
+            style.id = 'route-modal-styles';
+            style.textContent = `
+                .route-modal {
+                    max-width: 90%;
+                    max-height: 90vh;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .route-modal h3 {
+                    color: var(--primary-dark);
+                    margin-bottom: 20px;
+                    text-align: center;
+                }
+                
+                .route-map {
+                    flex: 1;
+                    min-height: 400px;
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                    margin-bottom: 20px;
+                }
+                
+                .route-info {
+                    text-align: center;
+                    padding: 20px;
+                }
+                
+                .route-info p {
+                    color: var(--gray-text);
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                }
+                
+                .route-info i {
+                    color: var(--accent-teal);
+                }
+                
+                .route-info .btn-primary {
+                    width: 100%;
+                    justify-content: center;
+                }
+            `;
             
-            .route-modal h3 {
-                color: var(--primary-dark);
-                margin-bottom: 20px;
-                text-align: center;
-            }
-            
-            .route-map {
-                flex: 1;
-                min-height: 400px;
-                border-radius: var(--radius);
-                overflow: hidden;
-                margin-bottom: 20px;
-            }
-            
-            .route-info {
-                text-align: center;
-                padding: 20px;
-            }
-            
-            .route-info p {
-                color: var(--gray-text);
-                margin-bottom: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            }
-            
-            .route-info i {
-                color: var(--accent-teal);
-            }
-            
-            .route-info .btn-primary {
-                width: 100%;
-                justify-content: center;
-            }
-        `;
-        
-        document.head.appendChild(style);
+            document.head.appendChild(style);
+        }
         document.body.appendChild(modal);
         
         // Закрытие модального окна
@@ -385,11 +393,13 @@ class MapManager {
             }
         });
         
-        document.addEventListener('keydown', (e) => {
+        const onKeyDown = (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
+                document.removeEventListener('keydown', onKeyDown);
             }
-        });
+        };
+        document.addEventListener('keydown', onKeyDown);
     }
     
     // Метод для скачивания схемы проезда

@@ -17,9 +17,7 @@ class CatalogManager {
         this.currentImageIndex = 0;
         this.images = [];
         this.mediaItems = []; // Массив для объединения изображений и видео
-        
-        // Таймер для предпросмотра видео
-        this.previewTimeout = null;
+        this.preloadedVideoUrls = new Set(); // Для фоновой предзагрузки видео
         
         // Для accessibility
         this.liveRegion = null;
@@ -53,6 +51,9 @@ class CatalogManager {
         
         // Инициализация анимаций
         this.initAnimations();
+
+        // Подключаем стили для предпросмотра видео на карточках и в модальном окне
+        this.addVideoStyles();
         
         // Объявляем о готовности
         this.announceToScreenReader('Каталог загружен. Доступно ' + this.filteredProducts.length + ' товаров.');
@@ -225,17 +226,85 @@ class CatalogManager {
         
         // Очищаем контейнер
         catalogGrid.innerHTML = '';
-        
-        // Создаем карточки товаров
+
+        // Создаем карточки товаров в документ-фрагменте (меньше перерисовок DOM)
+        const fragment = document.createDocumentFragment();
         this.filteredProducts.forEach((product, index) => {
             const productCard = this.createProductCard(product, index);
-            catalogGrid.appendChild(productCard);
+            fragment.appendChild(productCard);
         });
+        catalogGrid.appendChild(fragment);
         
         // Инициализация анимаций для новых карточек
         setTimeout(() => {
             this.initProductAnimations();
         }, 100);
+
+        // Фоновая предзагрузка видео товаров текущей категории
+        this.preloadProductVideosInBackground();
+
+        // Предзагрузка превью‑видео для быстрого старта при наведении
+        this.preloadHoverPreviewVideos();
+    }
+
+    /**
+     * Фоновая предзагрузка видео всех товаров текущей категории
+     * Браузер заранее качает видео и кладёт в кэш,
+     * поэтому предпросмотр и модальное видео стартуют быстрее.
+     */
+    preloadProductVideosInBackground() {
+        if (!this.products || this.products.length === 0) return;
+
+        const head = document.head || document.getElementsByTagName('head')[0];
+        if (!head) return;
+
+        try {
+            this.products.forEach(product => {
+                if (!product || !Array.isArray(product.videos)) return;
+
+                product.videos.forEach(src => {
+                    if (!src || this.preloadedVideoUrls.has(src)) return;
+
+                    const link = document.createElement('link');
+                    link.rel = 'preload';
+                    link.as = 'video';
+                    link.href = src;
+
+                    head.appendChild(link);
+                    this.preloadedVideoUrls.add(src);
+                });
+            });
+
+            console.log('🎬 Фоновая предзагрузка видео завершена, всего:', this.preloadedVideoUrls.size);
+        } catch (e) {
+            console.error('Ошибка фоновой предзагрузки видео:', e);
+        }
+    }
+
+    /**
+     * Предзагрузка именно превью‑видео на карточках,
+     * чтобы при первом наведении они стартовали максимально быстро.
+     */
+    preloadHoverPreviewVideos() {
+        const previewVideos = document.querySelectorAll('.product-video-preview');
+        if (!previewVideos || previewVideos.length === 0) return;
+
+        previewVideos.forEach(video => {
+            try {
+                // Если уже пробовали предзагрузить — пропускаем
+                if (video.dataset.preloaded === 'true') return;
+
+                // Уточняем режим предзагрузки и инициируем загрузку
+                video.preload = 'auto';
+                video.load();
+
+                video.dataset.preloaded = 'true';
+            } catch (e) {
+                console.warn('Не удалось предзагрузить превью‑видео:', e);
+            }
+        });
+
+        console.log('🎥 Превью‑видео подготовлены для быстрого старта при наведении');
     }
     
     /**
@@ -286,7 +355,7 @@ class CatalogManager {
                      loading="lazy"
                      data-video-src="${videoSrc || ''}"
                      onerror="this.src='https://via.placeholder.com/350x250/FFFFFF/333333?text=Изображение+товара'">
-                ${hasVideo ? `<video class="product-video-preview" src="${videoSrc}" preload="none" loop muted playsinline></video>` : ''}
+                ${hasVideo ? `<video class="product-video-preview" src="${videoSrc}" preload="auto" loop muted playsinline></video>` : ''}
             </div>
             
             <div class="product-content">
@@ -345,29 +414,33 @@ class CatalogManager {
             const imageContainer = card.querySelector('.product-image-container');
             const image = card.querySelector('.product-image');
             const video = card.querySelector('.product-video-preview');
-            
+
             if (imageContainer && image && video) {
-                imageContainer.addEventListener('mouseenter', () => {
-                    this.previewTimeout = setTimeout(() => {
-                        // Прячем изображение, показываем видео и начинаем воспроизведение
-                        image.style.opacity = '0';
-                        video.style.opacity = '1';
-                        video.play().catch(e => console.log('Не удалось воспроизвести видео при наведении:', e));
-                    }, 300); // Задержка 300мс перед показом видео
-                });
-                
-                imageContainer.addEventListener('mouseleave', () => {
-                    // Очищаем таймер
-                    if (this.previewTimeout) {
-                        clearTimeout(this.previewTimeout);
-                        this.previewTimeout = null;
-                    }
-                    
-                    // Возвращаем изображение и останавливаем видео
+                let previewTimeoutId = null;
+
+                const showVideo = () => {
+                    image.style.opacity = '0';
+                    video.style.opacity = '1';
+                    video.play().catch(e => console.log('Не удалось воспроизвести видео при наведении:', e));
+                };
+
+                const hideVideo = () => {
                     image.style.opacity = '1';
                     video.style.opacity = '0';
                     video.pause();
                     video.currentTime = 0;
+                };
+
+                imageContainer.addEventListener('mouseenter', () => {
+                    previewTimeoutId = window.setTimeout(showVideo, 300);
+                });
+
+                imageContainer.addEventListener('mouseleave', () => {
+                    if (previewTimeoutId !== null) {
+                        clearTimeout(previewTimeoutId);
+                        previewTimeoutId = null;
+                    }
+                    hideVideo();
                 });
             }
         }
