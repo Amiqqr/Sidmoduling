@@ -24,7 +24,7 @@ class SibModulingApp {
     init() {
         // Ожидаем полной загрузки DOM
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Инициализация приложения СибМодулинг (ГОСТ-версия)');
+            console.log('🚀 Инициализация приложения АЙ ДА МОДУЛЬ (ГОСТ-версия)');
             
             // Последовательная инициализация всех компонентов
             this.initAccessibilityBasics();
@@ -41,9 +41,9 @@ class SibModulingApp {
             this.initErrorHandling();
             
             // Объявляем о готовности приложения для скринридеров
-            this.announceToScreenReader('Сайт ООО СибМодулинг загружен. Используйте клавишу Tab для навигации.');
+            this.announceToScreenReader('Сайт АЙ ДА МОДУЛЬ загружен. Используйте клавишу Tab для навигации.');
             
-            console.log('✅ СибМодулинг приложение успешно инициализировано (ГОСТ-совместимая версия)');
+            console.log('✅ АЙ ДА МОДУЛЬ приложение успешно инициализировано (ГОСТ-совместимая версия)');
         });
         
         // Обработчики событий окна
@@ -843,7 +843,7 @@ class SibModulingApp {
         
         notification.innerHTML = `
             <div style="position: fixed; top: 20px; right: 20px; 
-                        background: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#17a2b8'}; 
+                        background: ${type === 'error' ? '#dc3545' : type === 'success' ? 'rgb(240, 167, 30)' : 'rgb(250, 100, 0)'}; 
                         color: white; padding: 16px 24px; border-radius: 8px; 
                         z-index: 3000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                         display: flex; align-items: center; gap: 12px;

@@ -18,7 +18,7 @@ const FALLBACK_PRODUCTS = [
               "id": 1,
       "category": "storage",
       "title": "Бытовка СТАНДАРТ",
-      "price": "250 000₽",
+      "price": "270 000₽",
       "oldPrice": null,
       "images": [
         "images/products/1.png",
@@ -105,7 +105,7 @@ const FALLBACK_PRODUCTS = [
       "id": 3,
       "category": "storage",
       "title": "ХОЗ БЛОК",
-      "price": "140 000₽",
+      "price": "155 000₽",
       "oldPrice": null,
       "images": [
         "images/products/3.png",
@@ -143,7 +143,7 @@ const FALLBACK_PRODUCTS = [
       "id": 4,
       "category": "offices",
       "title": "Торговый Павильон",
-      "price": "550 000₽",
+      "price": "670 000₽",
       "oldPrice": "",
       "images": [
         "images/products/4.png",
@@ -185,7 +185,7 @@ const FALLBACK_PRODUCTS = [
       "id": 5,
       "category": "storage",
       "title": "Бытовка",
-      "price": "350 000₽",
+      "price": "395 000₽",
       "oldPrice": "",
       "images": [
         "images/products/5.png",
@@ -227,12 +227,15 @@ const FALLBACK_PRODUCTS = [
       "id": 6,
       "category": "houses",
       "title": "Модульный Дом",
-      "price": "550 000₽",
+      "price": "675 000₽",
       "oldPrice": "",
       "images": [
         "images/products/6.png",
-        "images/products/6.png",
-        "images/products/6.png"
+        "images/products/6.1.jpg",
+        "images/products/6.2.jpg",
+        "images/products/6.3.jpg",
+        "images/products/6.4.jpg",
+        "images/products/6.5.jpg"
       ],
       "videos": [
         "images/video/6.mp4"
@@ -277,7 +280,7 @@ const FALLBACK_PRODUCTS = [
       "id": 7,
       "category": "storage",
       "title": "Бытовка в стиле Домик",
-      "price": "350 000₽",
+      "price": "395 000₽",
       "oldPrice": "",
       "images": [
         "images/products/7.png",
@@ -318,7 +321,7 @@ const FALLBACK_PRODUCTS = [
     "id": 8,
     "category": "houses",
     "title": "Домик с Терассой",
-    "price": "800 000₽",
+    "price": "900 000₽",
     "oldPrice": "",
     "images": [
         "images/products/8.png",
@@ -434,7 +437,237 @@ const FALLBACK_PRODUCTS = [
         "frame": "швеллер 120.50.3  профтруба 50.50.3",
         "warranty": "12 месяцев"
     }
-    }
+    },
+    {
+  "id": 11,
+  "category": "houses",
+  "title": "БарнХаус",
+  "price": "2 000 000 ₽",
+  "oldPrice": "",
+  "images": [
+    "images/products/12.7.jpg",
+    "images/products/12.1.jpg",
+    "images/products/12.3.jpg",
+    "images/products/12.4.jpg",
+    "images/products/12.5.jpg",
+    "images/products/12.6.jpg",
+    "images/products/12.jpg"
+  ],
+  "features": [
+    "Площадь: 30 м²",
+    "Длина: 6 м",
+    "Ширина: 5 м",
+    "Высота: 3 м",
+    "Утепление пола: 150 мм каменной ваты Технониколь",
+    "Утепление стен: 150 мм каменной ваты Технониколь",
+    "Утепление потолка: 150 мм каменной ваты Технониколь",
+    "Каркас: швеллер 120.50.3 мм",
+    "Уголок: 75.75.5 мм",
+    "Профтруба: 50.50.3 мм (усиленный каркас)",
+    "Наружная отделка: Профлист / фасадные панели",
+    "Внутренняя отделка: МДФ панели / вагонка",
+    "Окна: 2 шт",
+    "Дверь: металлическая утепленная",
+    "Пол: линолеум / ламинат",
+    "Подшив пола: металл",
+    "Электрика: 4 шт светильники, 4 шт розетки",
+    "Защита: ветро+влагозащита, пароизоляция",
+    "Назначение: круглогодичное проживание"
+  ],
+  "badge": "новинка",
+  "sale": null,
+  "description": "Теплый и надежный БарнХаус 5×6 м (30 м²) с высотой потолков 3 м. Усиленный комбинированный каркас из швеллера 120 мм и профтрубы 50.50.3 мм гарантирует максимальную прочность. Полное утепление 150 мм каменной ватой Технониколь по всем поверхностям — идеально для круглогодичного проживания. Внутренняя отделка МДФ/вагонка, наружная — профлист. Установлена электрика (светильники и розетки).",
+  "specifications": {
+    "area": "30 м²",
+    "length": "6 м",
+    "width": "5 м",
+    "height": "3 м",
+    "floor_insulation": "150 мм (каменная вата Технониколь)",
+    "wall_insulation": "150 мм (каменная вата Технониколь)",
+    "roof_insulation": "150 мм (каменная вата Технониколь)",
+    "frame": "швеллер 120.50.3 + профтруба 50.50.3",
+    "warranty": "12 месяцев"
+  }
+},
+{
+  "id": 12,
+  "category": "houses",
+  "title": "каркасный дом",
+  "price": "От 950 000 ₽",
+  "oldPrice": "",
+  "images": [
+    "images/products/13.jpg",
+    "images/products/13.1.jpg",
+    "images/products/13.2.jpg",
+    "images/products/13.3.jpg",
+    "images/products/13.4.jpg",
+    "images/products/13.5.jpg",
+    "images/products/13.6.jpg",
+    "images/products/13.7.jpg",
+  ],
+  "features": [
+    "Размер модуля: 6 × 3 м",
+    "Размер террасы: 6 × 2 м",
+    "Размер модуля С/У: 2 × 2 м",
+    "Общая площадь: 18 м² + 12 м² (терраса) + 4 м² (С/У)",
+    "Высота: 2,65 м",
+    "Каркас: швеллер 120.50.3, уголок 75.75.5, дерево: брус 150.40, доска 100.25",
+    "Каркас террасы: швеллер 120.50.3, труба 50.50, брус 100.40, доска 100.25",
+    "Утепление пола: 150 мм каменной ваты",
+    "Утепление потолка: 150 мм каменной ваты",
+    "Утепление стен: 100 мм каменной ваты",
+    "Защита: ветро+влагозащита, пароизоляция",
+    "Наружная отделка: профлист 0.4 мм волна 8 (Графит)",
+    "Лицевая часть: имитация бруса лиственница",
+    "Внутренняя отделка: вагонка лиственница (по кругу)",
+    "Терраса: палубная доска лиственница, потолок вагонка лиственница",
+    "Обшивка входа: имитация бруса лиственница",
+    "Окно основное: пластиковое двухкамерное 120×120 (Графит) - 1 шт.",
+    "Окно С/У: пластиковое двухкамерное 50×70 (Графит) - 1 шт.",
+    "Дверь: металлическая с замками",
+    "Дверь С/У: межкомнатная",
+    "Подшив пола: металл",
+    "Пол: линолеум полукоммерческий (светлый)",
+    "Внутренняя электрика: светильник 2 шт., розетка 3 шт., выключатель 2 шт., щиток 1 шт.",
+    "Электрика С/У: светильник 1 шт., розетка 1 шт.",
+    "Уличная электрика: светильник 3 шт.",
+    "Назначение: круглогодичное проживание"
+  ],
+  "badge": "новинка",
+  "sale": null,
+  "description": "БарнХаус с террасой и встроенным санузлом. Основной модуль 6×3 м утеплен 150 мм по полу/потолку и 100 мм по стенам каменной ватой. Усиленный металлокаркас из швеллера 120 мм и профтрубы. Наружная отделка — профлист (Графит) с лицевой частью из имитации бруса лиственница. Внутри — вагонка лиственница по кругу. Терраса 6×2 м с палубной доской и потолком из вагонки. Встроенный С/У 2×2 м с окном, межкомнатной дверью и электрикой. Полный пакет электрики: внутренняя, уличная и в С/У.",
+  "specifications": {
+    "area": "18 м² + 12 м² (терраса) + 4 м² (С/У)",
+    "length": "6 м",
+    "width": "3 м",
+    "terrace_size": "6 × 2 м",
+    "bathroom_size": "2 × 2 м",
+    "height": "2,65 м",
+    "floor_insulation": "150 мм (каменная вата)",
+    "wall_insulation": "100 мм (каменная вата)",
+    "roof_insulation": "150 мм (каменная вата)",
+    "frame": "швеллер 120.50.3 + уголок 75.75.5 + брус 150.40",
+    "exterior": "профлист 0.4 мм (Графит) + имитация бруса лиственница",
+    "interior": "вагонка лиственница",
+    "flooring": "линолеум полукоммерческий (светлый)",
+    "windows": "120×120 (1 шт), 50×70 (1 шт)",
+    "door": "металлическая с замками + межкомнатная",
+    "warranty": "12 месяцев"
+  }
+},
+{
+  "id": 13,
+  "category": "houses",
+  "title": "бытовка",
+  "price": "650 000 ₽",
+  "oldPrice": "",
+  "images": [
+    "images/products/14.jpg",
+    "images/products/14.1.jpg",
+    "images/products/14.2.jpg",
+    "images/products/14.3.jpg",
+    "images/products/14.4.jpg"
+  ],
+  "features": [
+    "Размер модуля: 6 × 3 м",
+    "Размер террасы: 6 × 2 м",
+    "Размер модуля С/У: 2 × 2 м",
+    "Общая площадь: 18 м² + 12 м² (терраса) + 4 м² (С/У)",
+    "Высота: 2,65 м",
+    "Каркас: швеллер 120.50.3, уголок 75.75.5, дерево: брус 150.40, доска 100.25",
+    "Каркас террасы: швеллер 120.50.3, труба 50.50, брус 100.40, доска 100.25",
+    "Утепление пола: 150 мм каменной ваты",
+    "Утепление потолка: 150 мм каменной ваты",
+    "Утепление стен: 100 мм каменной ваты",
+    "Защита: ветро+влагозащита, пароизоляция",
+    "Наружная отделка: профлист 0.4 мм волна 8 (Графит)",
+    "Лицевая часть: имитация бруса лиственница",
+    "Внутренняя отделка: вагонка лиственница (по кругу)",
+    "Терраса: палубная доска лиственница, потолок вагонка лиственница",
+    "Обшивка входа: имитация бруса лиственница",
+    "Окно основное: пластиковое двухкамерное 120×120 (Графит) - 1 шт.",
+    "Окно С/У: пластиковое двухкамерное 50×70 (Графит) - 1 шт.",
+    "Дверь: металлическая с замками",
+    "Дверь С/У: межкомнатная",
+    "Подшив пола: металл",
+    "Пол: линолеум полукоммерческий (светлый)",
+    "Внутренняя электрика: светильник 2 шт., розетка 3 шт., выключатель 2 шт., щиток 1 шт.",
+    "Электрика С/У: светильник 1 шт., розетка 1 шт.",
+    "Уличная электрика: светильник 3 шт.",
+    "Назначение: круглогодичное проживание"
+  ],
+  "badge": "новинка",
+  "sale": null,
+  "description": "БарнХаус с террасой и встроенным санузлом. Основной модуль 6×3 м утеплен 150 мм по полу/потолку и 100 мм по стенам каменной ватой. Усиленный металлокаркас из швеллера 120 мм и профтрубы. Наружная отделка — профлист (Графит) с лицевой частью из имитации бруса лиственница. Внутри — вагонка лиственница по кругу. Терраса 6×2 м с палубной доской и потолком из вагонки. Встроенный С/У 2×2 м с окном, межкомнатной дверью и электрикой. Полный пакет электрики: внутренняя, уличная и в С/У.",
+  "specifications": {
+    "area": "18 м² + 12 м² (терраса) + 4 м² (С/У)",
+    "length": "6 м",
+    "width": "3 м",
+    "terrace_size": "6 × 2 м",
+    "bathroom_size": "2 × 2 м",
+    "height": "2,65 м",
+    "floor_insulation": "150 мм (каменная вата)",
+    "wall_insulation": "100 мм (каменная вата)",
+    "roof_insulation": "150 мм (каменная вата)",
+    "frame": "швеллер 120.50.3 + уголок 75.75.5 + брус 150.40",
+    "exterior": "профлист 0.4 мм (Графит) + имитация бруса лиственница",
+    "interior": "вагонка лиственница",
+    "flooring": "линолеум полукоммерческий (светлый)",
+    "windows": "120×120 (1 шт), 50×70 (1 шт)",
+    "door": "металлическая с замками + межкомнатная",
+    "warranty": "12 месяцев"
+  }
+},
+{
+  "id": 14,
+  "category": "houses",
+  "title": "БарнХаус",
+  "price": "670 000 ₽",
+  "oldPrice": "",
+  "images": [
+    "images/products/15.1.jpg",
+    "images/products/15.jpg",
+    "images/products/15.2.jpg",
+    "images/products/15.3.jpg"
+  ],
+  "features": [
+    "Площадь: 12 м²",
+    "Длина: 5 м",
+    "Ширина: 2,4 м",
+    "Высота: 2,7 м",
+    "Каркас: швеллер 120.50.3, уголок 75.75.5, профтруба 50.50.3 (усиленный)",
+    "Утепление пола: 150 мм каменной ваты",
+    "Утепление стен: 100 мм каменной ваты",
+    "Утепление потолка: 100 мм каменной ваты",
+    "Защита: ветро+влагозащита, пароизоляция",
+    "Наружная отделка: профлист + имитация бруса",
+    "Внутренняя отделка: вагонка",
+    "Окна: панорамные 2 шт",
+    "Дверь: встроена в панорамное окно",
+    "Подшив пола: металл",
+    "Пол: линолеум",
+    "Назначение: круглогодичное проживание"
+  ],
+  "badge": "новинка",
+  "sale": null,
+  "description": "Компактный и теплый БарнХаус 5×2,4 м (12 м²) с высотой потолков 2,7 м. Усиленный металлокаркас из швеллера 120 мм, уголка 75 мм и профтрубы 50 мм. Качественное утепление: пол 150 мм, стены и потолок 100 мм каменной ватой. Внутренняя отделка — вагонка, наружная — профлист с имитацией бруса. Два панорамных окна с интегрированной дверью создают ощущение простора и света. Подшив пола металлом, покрытие — линолеум. Идеальное решение для круглогодичного проживания.",
+  "specifications": {
+    "area": "12 м²",
+    "length": "5 м",
+    "width": "2,4 м",
+    "height": "2,7 м",
+    "floor_insulation": "150 мм (каменная вата)",
+    "wall_insulation": "100 мм (каменная вата)",
+    "roof_insulation": "100 мм (каменная вата)",
+    "frame": "швеллер 120.50.3 + уголок 75.75.5 + профтруба 50.50.3 (усиленный)",
+    "exterior": "профлист + имитация бруса",
+    "interior": "вагонка",
+    "windows": "панорамные 2 шт",
+    "door": "встроена в панорамное окно",
+    "flooring": "линолеум",
+    "warranty": "12 месяцев"
+  }
+}
 ];
 
 // Класс для работы с API
@@ -524,7 +757,7 @@ class DatabaseAPI {
             this.settings = {
                 telegram_bot_token: "8314444138:AAGVRIjXCaz7gJGoOSK1lGcFRC2TaVmybXc",
                 telegram_chat_id: "7614870794",
-                site_name: "ООО СибМодулинг",
+                site_name: "АЙ ДА МОДУЛЬ",
                 currency: "₽"
             };
             
@@ -550,43 +783,101 @@ class DatabaseAPI {
         }
     }
     
-    // Создание заказа
-    async createOrder(orderData) {
-        try {
-            const response = await fetch(API_CONFIG.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'create_order',
-                    ...orderData,
-                    source: window.location.href,
-                    date: new Date().toLocaleString('ru-RU')
-                })
-            });
-            
-            if (!response.ok) throw new Error('Ошибка создания заказа');
-            
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error('Ошибка создания заказа:', error);
-            
-            // Fallback: отправка напрямую в Telegram
-            if (this.settings.telegram_bot_token && this.settings.telegram_chat_id) {
-                await this.sendToTelegramDirectly(orderData);
-            }
-            
-            return {
-                success: true,
-                order_id: Date.now(),
-                telegram_sent: true,
-                fallback: true
-            };
+ async createOrder(orderData) {
+    try {
+        const response = await fetch(API_CONFIG.baseUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'create_order',
+                ...orderData,
+                source: window.location.href,
+                date: new Date().toLocaleString('ru-RU')
+            })
+        });
+        
+        if (!response.ok) throw new Error('Ошибка создания заказа');
+        
+        const result = await response.json();
+        
+        // Отправка на email (параллельно с основным запросом)
+        this.sendToEmail(orderData);
+        
+        return result;
+    } catch (error) {
+        console.error('Ошибка создания заказа:', error);
+        
+        // Fallback: отправка на email и в Telegram
+        let emailSent = await this.sendToEmail(orderData);
+        let telegramSent = false;
+        
+        if (this.settings.telegram_bot_token && this.settings.telegram_chat_id) {
+            telegramSent = await this.sendToTelegramDirectly(orderData);
         }
+        
+        return {
+            success: true,
+            order_id: Date.now(),
+            email_sent: emailSent,
+            telegram_sent: telegramSent,
+            fallback: true
+        };
     }
-    
+}
+ // Отправка на email
+async sendToEmail(orderData) {
+    try {
+        // Вариант 1: Через ваш PHP бэкенд (рекомендуется)
+        const response = await fetch('/server/send-email.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                to: 'sibmoduling@gmail.com',  // Ваш email
+                subject: `Новая заявка с сайта ${this.settings.site_name || 'АЙ ДА МОДУЛЬ'}`,
+                data: orderData
+            })
+        });
+        
+        return response.ok;
+        
+    } catch (error) {
+        console.error('Ошибка отправки email:', error);
+        
+        // Вариант 2: Через formspree.io (бесплатно, без бэкенда)
+        // return await this.sendToFormspree(orderData);
+        
+        return false;
+    }
+}
+
+// Альтернативный вариант: отправка через Formspree (без своего бэкенда)
+async sendToFormspree(orderData) {
+    try {
+        const response = await fetch('https://formspree.io/f/ВАШ_КОД', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: orderData.name,
+                phone: orderData.phone,
+                email: orderData.email,
+                product: orderData.product,
+                message: orderData.message,
+                _subject: `Новая заявка - ${orderData.name}`
+            })
+        });
+        
+        return response.ok;
+    } catch (error) {
+        console.error('Ошибка отправки через Formspree:', error);
+        return false;
+    }
+}   
     // Прямая отправка в Telegram (fallback)
     async sendToTelegramDirectly(orderData) {
         try {

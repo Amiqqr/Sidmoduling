@@ -55,7 +55,7 @@ class MapManager {
                 allowfullscreen="true"
                 style="position:absolute;"
                 loading="lazy"
-                title="Карта расположения СибМодулинг"
+                title="Карта расположение АЙ ДА МОДУЛЬ"
             ></iframe>
         `;
         
@@ -98,7 +98,7 @@ class MapManager {
                 allowfullscreen="" 
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
-                title="Карта расположения СибМодулинг (Google Maps)"
+                title="Карта расположение АЙ ДА МОДУЛЬ (Google Maps)"
             ></iframe>
         `;
         
@@ -171,7 +171,7 @@ class MapManager {
                         frameborder="0" 
                         allowfullscreen="true"
                         loading="lazy"
-                        title="Карта проезда к СибМодулинг"
+                        title="Карта проезда к АЙ ДА МОДУЛЬ"
                     ></iframe>
                 </div>
                 <div class="map-instructions">
@@ -318,7 +318,7 @@ class MapManager {
                         height="100%" 
                         frameborder="0" 
                         allowfullscreen="true"
-                        title="Маршрут до СибМодулинг"
+                        title="Маршрут до АЙ ДА МОДУЛЬ"
                     ></iframe>
                 </div>
                 <div class="route-info">

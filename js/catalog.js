@@ -1118,7 +1118,7 @@ class CatalogManager {
             }
             
             .image-thumbnail:focus-visible {
-                outline: 3px solid #0066CC;
+                outline: 3px solid rgb(250, 102, 0);
                 outline-offset: 2px;
             }
             
@@ -1213,7 +1213,7 @@ class CatalogManager {
             }
             
             .features-nav-btn:focus-visible {
-                outline: 3px solid #0066CC;
+                outline: 3px solid rgb(250, 102, 0);
                 outline-offset: 2px;
             }
             
@@ -1950,7 +1950,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .tab-btn:focus-visible,
         .btn-small:focus-visible,
         .image-thumbnail:focus-visible {
-            outline: 3px solid #0066CC;
+            outline: 3px solid rgb(250, 102, 0);
             outline-offset: 2px;
         }
     `;
@@ -2032,7 +2032,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         .fullscreen-btn:focus-visible {
-            outline: 3px solid #0066CC;
+            outline: 3px solid rgb(250, 102, 0);
             outline-offset: 2px;
         }
         

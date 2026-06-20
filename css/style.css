@@ -1,9 +1,9 @@
 :root {
     /* Updated colors for better contrast (WCAG AA compliant) */
-    --primary-dark: #fa7645; /* Darker orange for better contrast */
-    --primary-blue: #ff8c00; /* Darker orange */
-    --accent-teal: #ffa500; /* Darker orange for better visibility */
-    --accent-light: #F39C12; /* Adjusted for contrast */
+    --primary-dark: rgb(249, 78, 0); /* Darker orange for better contrast */
+    --primary-blue: rgb(255, 100, 0); /* Darker orange */
+    --accent-teal: rgb(255, 125, 0); /* Darker orange for better visibility */
+    --accent-light: rgb(243, 140, 18); /* Adjusted for contrast */
     --light-bg: #F8F9FA;
     --dark-text: #212529; /* Almost black, high contrast */
     --gray-text: #495057; /* Darker gray for better contrast (4.6:1 on white) */
@@ -17,7 +17,7 @@
     --header-height: 80px;
     
     /* Focus outline color */
-    --focus-color: #0066CC;
+    --focus-color: rgb(249, 78, 0);
 }
 
 * {
@@ -61,7 +61,7 @@ h1, h2, h3, h4 {
 
 .skip-link:focus {
     top: 0;
-    outline: 3px solid #FFD700;
+    outline: 3px solid rgb(255, 150, 0);
     outline-offset: 2px;
 }
 
@@ -561,7 +561,7 @@ header {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: #E67E22;
+    background: rgb(250, 120, 20);
     color: white;
     padding: 8px 16px;
     border-radius: 20px;
@@ -1195,7 +1195,7 @@ header {
 
 .required::after {
     content: ' *';
-    color: #FFD700;
+    color: rgb(255, 150, 0);
     font-weight: bold;
 }
 
@@ -1253,7 +1253,7 @@ select.form-control option {
 
 .error-message {
     display: none;
-    color: #FFD700;
+    color: rgb(255, 150, 0);
     font-size: 14px;
     margin-top: 5px;
     font-weight: 600;
